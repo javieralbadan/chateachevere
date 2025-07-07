@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+
+@layer base {
+  html {
+    font-family: 'Nunito', sans-serif;
+  }
+  
+  body {
+    font-family: 'Nunito', sans-serif;
+    color: var(--text-dark);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito', sans-serif;
+  }
+  
+  * {
+    font-family: 'Nunito', sans-serif;
+  }
+}
+
+:root {
+  --primary-color: #25D366;
+  --off-white: #FFF9F5;
+  --background: #ffffff;
+  --foreground: #171717;
+  --text-dark: #333333;
+  --text-light: #666666;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --animation-speed: 0.3s;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply container mx-auto px-4 md:px-8;
+  }
+  
+  .section-padding {
+    @apply py-12 md:py-20;
+  }
+  
+  .heading-primary {
+    @apply text-3xl md:text-5xl font-semibold text-primary-color mb-4;
+  }
+  
+  .heading-secondary {
+    @apply text-2xl md:text-3xl font-semibold mb-3;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-color text-white py-3 px-6 rounded-lg font-medium 
+           transition-all duration-300 hover:shadow-md hover:-translate-y-1;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-primary-color text-primary-color py-2.5 px-5 rounded-lg font-medium 
+           transition-all duration-300 hover:bg-primary-color hover:text-white;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-lg;
+  }
+
+  .service-title {
+    @apply italic font-semibold text-xl md:text-2xl text-primary-color mb-3;
+  }
+
+  .service-description {
+    @apply text-text-light mb-4;
+  }
+
+  .service-details {
+    @apply text-sm text-text-light mb-2;
+  }
+
+  .price-tag {
+    @apply font-semibold text-lg md:text-xl mb-4;
+  }
+}
+
+.loader {
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

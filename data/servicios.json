@@ -1,0 +1,35 @@
+[
+  {
+    "id": "chats-automaticos",
+    "name": "Cuenta genérica de WS",
+    "description": "Toma pedidos, ofrece tus productos y sevicios con conversaciones automatizadas",
+    "images": ["/imgs/servicios/logo-frontal-unsplash.jpg", "/imgs/servicios/logo-black-background-unsplash.jpg", "/imgs/servicios/logo-3d-unsplash.jpg"],
+    "price": "$12.500",
+    "whatsappText": "Hola, quiero averiguar por la automatización de whatsapp"
+  },
+  {
+    "id": "optimiza-tiempos",
+    "name": "Tu propia cuenta de WS",
+    "description": "Elimina largas esperas o multiples chats para atender mientras tus clientes hacen sus elecciones",
+    "images": ["/imgs/servicios/chats-list-unsplash.jpg", "/imgs/servicios/chats-waiting-unsplash.jpg", "/imgs/servicios/empty-chat-unsplash.jpg"],
+    "price": "$12.500",
+    "whatsappText": "Hola, quiero averiguar por la automatización de whatsapp"
+  },
+  {
+    "id": "aumenta-ganancias",
+    "name": "Aumenta ganancias",
+    "description": "Reduce tiempos para la primera atención a tus clientes, mientras se piensa y se elige, tendrás tiempo para enfocarte de lleno en tu negocio. Retén más a tus clientes, atrae nuevos y genera más ventas",
+    "images": ["/imgs/servicios/calculadora-unsplash.jpg", "/imgs/servicios/colombian-pesos.jpg", "/imgs/servicios/monedas-unsplash.jpg"],
+    "price": "$12.500",
+    "whatsappText": "Hola, quiero averiguar por la automatización de whatsapp"
+  },
+  {
+    "id": "atrae-mas-clientes",
+    "name": "Atrae más clientes",
+    "description": "Entrega y obtén información más precisa y haz que tus clientes retornen y corran la voz",
+    "images": ["/imgs/servicios/applogo-in-phone-unsplash.jpg", "/imgs/servicios/man-chatting-unsplash.jpg", "/imgs/servicios/person-chatting-unsplash.jpg"],
+    "price": "$12.500",
+    "whatsappText": "Hola, quiero averiguar por la automatización de whatsapp"
+  }
+]
+  
