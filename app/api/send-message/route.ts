@@ -1,10 +1,15 @@
 import { MessageBodyRequest } from '@/types/messages';
 import { handleNextErrorResponse, handleNextSuccessResponse } from '@/utils/mappers/nextResponse';
+import { getUnavailableResponse, isFirebaseStaticExport } from '@/utils/server/firebase-check';
 import { sendWhatsappTemplateMessage } from '@/utils/server/whatsapp';
 
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
 
 export async function POST(req: Request) {
+  if (isFirebaseStaticExport()) {
+    return getUnavailableResponse();
+  }
+
   try {
     if (!isAuthorized(req)) {
       return handleNextErrorResponse('No autorizado', 401);

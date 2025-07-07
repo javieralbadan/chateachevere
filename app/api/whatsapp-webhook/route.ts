@@ -1,12 +1,19 @@
 import { WhatsAppWebhookBody } from '@/types/whatsapp';
+import { getUnavailableResponse, isFirebaseStaticExport } from '@/utils/server/firebase-check';
 import { getActiveConversationsStats } from '@/utils/server/restaurant-conversation';
 import { getResponseMessage, sendWhatsappTextMessage } from '@/utils/server/whatsapp';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
 
 // Verificación del webhook - Meta realiza request GET al Callback URL
 export function GET(request: NextRequest) {
+  if (isFirebaseStaticExport()) {
+    return getUnavailableResponse();
+  }
+
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get('hub.mode');
   const token = searchParams.get('hub.verify_token');
@@ -22,6 +29,10 @@ export function GET(request: NextRequest) {
 
 // Manejo de mensajes entrantes (POST)
 export async function POST(request: NextRequest) {
+  if (isFirebaseStaticExport()) {
+    return getUnavailableResponse();
+  }
+
   try {
     const jsonData: unknown = await request.json();
     const body = jsonData as WhatsAppWebhookBody;
