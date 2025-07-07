@@ -1,0 +1,35 @@
+import { NextResponse } from 'next/server';
+
+export const DB_CODES = {
+  NOT_FOUND: 'PGRST116',
+  UNIQUE_VIOLATION: '23505',
+};
+// CHECK_CONSTRAINT_VIOLATION: '23514',
+
+export const API_CODES = {
+  OK: 200,
+  CREATED: 201,
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500,
+};
+
+export const handleNextSuccessResponse = <T>(data: T, status: number = API_CODES.OK) => {
+  return NextResponse.json({ data: data || null, error: null }, { status });
+};
+
+export const handleNextErrorResponse = (errorParam: Error | string, statusCode?: number) => {
+  console.error('🔎 handleNextErrorResponse - Unexpected error:', errorParam);
+  // TODO: Implement sentry || datadog
+  let error;
+  let status = statusCode || API_CODES.INTERNAL_SERVER_ERROR;
+
+  if (typeof errorParam === 'string') {
+    error = errorParam || 'Error interno';
+    return NextResponse.json({ data: null, error }, { status });
+  } else {
+    error = errorParam.message || 'Error interno';
+    status = API_CODES.INTERNAL_SERVER_ERROR;
+    return NextResponse.json({ data: null, error }, { status });
+  }
+};

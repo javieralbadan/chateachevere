@@ -16,6 +16,7 @@
     "@ant-design/icons": "^5.5.1",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "antd": "^5.20.3",
+    "luxon": "^3.6.1",
     "next": "^15.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/luxon": "^3.6.2",
     "@types/next": "^8.0.7",
     "@types/node": "^20",
     "@types/react": "^19",
