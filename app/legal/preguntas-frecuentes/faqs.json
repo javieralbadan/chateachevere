@@ -1,0 +1,30 @@
+[
+	{
+		"question": "¿Qué es CHATEA CHEVERE?",
+		"answer": "Es un servicio para la automatización del chat de Whatsapp®️, permitiendo que propietarios de NEGOCIOS independientes ofrezcan más fácil la prestación de sus servicios y/o la venta de sus productos en general."
+	},
+	{
+		"question": "¿Cuál es el objetivo de CHATEA CHEVERE?",
+		"answer": "CHATEA CHEVERE pretende aportar un granito de arena en uso de los recursos digitales al servicio de la comunidad bogotana, haciendo que una interacción sea más fluida, efectiva y chévere."
+	},
+	{
+		"question": "¿En qué ciudades y lugares se encuentran?",
+		"answer": "Actualmente estamos en la ciudad de Bogotá."
+	},
+	{
+		"question": "¿CHATEA CHEVERE es un aplicativo móvil?",
+		"answer": "No. Somos una plataforma web (sitio web) a la cual accedes por medio de un navegador o explorador. Sin embargo, toda la experiencia CHATEA CHEVERE está diseñada y adaptada para ser usada en la aplicación móvil Whatsapp®️."
+	},
+	{
+		"question": "¿Hay que pagar por la configuración inicial?",
+		"answer": "Usualmente si. Sin embargo, dependerá del acuerdo comercial o de la campaña que se esté llevando a cabo. Toda automatización requiere un esfuerzo inicial, de tiempo y recursos por parte de nuestro equipo de ingenieros, que incluye acciones como: creación de cuentas en la plataforma Meta, vinculación y validación de números de teléfono, desarrollo e implementación de código y algoritmos, pruebas y validaciones de interacción, entre otros."
+	},
+	{
+		"question": "¿Hay que pagar una subscripción?",
+		"answer": "Si. El servicio que CHATEA CHEVERE ofrece está constituído por diferentes planes membresías acordes a lo que cada negocio necesita. La utilización diaria de mensajes automáticos conlleva a una facturación mensual directa con la plataforma Meta/Whatsapp®️. La mensualidad se debe pagar de forma anticipada, según los ciclos de facturación establecidos en el momento del acuerdo comercial"
+	},
+	{
+		"question": "¿Puedo cancelar mi subscripción en cualquier momento?",
+		"answer": "Si. No hay claúsulas de permanencia, de manera que se puede cancelar el servicio en el momento que desees."
+	}
+]
