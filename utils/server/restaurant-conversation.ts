@@ -80,7 +80,7 @@ interface UserConversation {
 }
 
 // Configuración del sistema
-const CONVERSATION_TIMEOUT = 10 * 60 * 1000; // 10 minutos
+const CONVERSATION_TIMEOUT = 30 * 60 * 1000; // 30 minutos
 const DELIVERY_COST = 2000; // $2.000 por domicilio
 
 // Almacenamiento en memoria de las conversaciones activas
@@ -103,11 +103,24 @@ function calculateDeliveryTotal(cart: CartItem[]): number {
 // Limpiar conversaciones antiguas
 function cleanupOldConversations() {
   const timeoutAgo = Date.now() - CONVERSATION_TIMEOUT;
+  const conversationsToDelete: string[] = [];
+
   for (const [phone, conversation] of activeConversations.entries()) {
+    // No eliminar conversaciones que tengan items en el carrito, sin importar el tiempo
+    if (conversation.cart.length > 0) {
+      continue;
+    }
+
+    // Solo eliminar si realmente ha pasado mucho tiempo y no hay carrito
     if (conversation.lastInteraction < timeoutAgo) {
-      activeConversations.delete(phone);
+      conversationsToDelete.push(phone);
     }
   }
+
+  // Eliminar las conversaciones marcadas
+  conversationsToDelete.forEach((phone) => {
+    activeConversations.delete(phone);
+  });
 }
 
 // Obtener o crear conversación
@@ -135,18 +148,22 @@ function updateConversation(phoneNumber: string, updates: Partial<UserConversati
   activeConversations.set(phoneNumber, conversation);
 }
 
-// Procesar mensaje de restaurante
 export function processRestaurantMessage(phoneNumber: string, message: string): string {
+  // Primero obtenemos o creamos la conversación
   const conversation = getOrCreateConversation(phoneNumber);
 
-  // Si no hay conversacion activa, reiniciar objeto de conversación
-  if (!hasActiveRestaurantConversation(phoneNumber)) {
+  // Solo reiniciamos si realmente no hay conversación o si carrito está vacío y step is welcome
+  const shouldReset =
+    !activeConversations.has(phoneNumber) ||
+    (conversation.step === 'welcome' && conversation.cart.length === 0);
+
+  if (shouldReset && !hasActiveRestaurantConversation(phoneNumber)) {
     updateConversation(phoneNumber, {
       step: 'welcome',
       selectedCategory: undefined,
       selectedItem: undefined,
       selectedItemIndex: undefined,
-      cart: [],
+      cart: [], // Solo limpiamos el carrito si realmente no hay conversación activa
     });
     return getWelcomeMessage();
   }
@@ -238,7 +255,7 @@ function handleWelcomeResponse(phoneNumber: string, message: string): string {
     return generateOptionsMessage(category.items, category.name, category.emoji, additionalInfo);
   }
 
-  return `❌ Opción no válida. ${getWelcomeMessage()}`;
+  return getWelcomeMessage();
 }
 
 // Manejar selección de categoría del menú
@@ -365,7 +382,7 @@ function handleCartActions(phoneNumber: string, message: string): string {
     case 2:
       // Proceder al checkout
       if (conversation.cart.length === 0) {
-        return `❌ Tu carrito está vacío. ${getWelcomeMessage()}`;
+        return `❌ Tu carrito está vacío.!\n\n${getWelcomeMessage()}`;
       }
       updateConversation(phoneNumber, { step: 'checkout' });
       return getCheckoutMessage(conversation.cart);
@@ -373,7 +390,7 @@ function handleCartActions(phoneNumber: string, message: string): string {
     case 3:
       // Vaciar carrito
       updateConversation(phoneNumber, { cart: [], step: 'welcome' });
-      return `🗑️ Carrito vaciado!\n\n ${getWelcomeMessage()}`;
+      return `🗑️ Carrito vaciado!\n\n${getWelcomeMessage()}`;
 
     default:
       return `❌ Opción no válida. ${getCartActionsMessage(conversation.cart)}`;
@@ -496,6 +513,18 @@ function generateOrderSummary(cart: CartItem[], total: number, orderNumber: stri
 
 // Verificar si hay una conversación activa
 export function hasActiveRestaurantConversation(phoneNumber: string): boolean {
+  // Primero verificar si existe la conversación
+  const conversation = activeConversations.get(phoneNumber);
+  if (!conversation) {
+    return false;
+  }
+
+  // Si tiene items en el carrito, considerarla activa sin importar el tiempo
+  if (conversation.cart.length > 0) {
+    return true;
+  }
+
+  // Solo hacer cleanup si no hay carrito
   cleanupOldConversations();
   return activeConversations.has(phoneNumber);
 }

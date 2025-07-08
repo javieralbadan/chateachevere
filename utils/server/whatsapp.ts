@@ -119,24 +119,15 @@ export function getResponseMessage(phoneNumber: string, incomingMessage: string)
   }
 
   // Verificar si es una conversación de restaurante (nueva o existente)
-  if (lowerMessage.includes('barberia')) {
+  if (lowerMessage.includes('pizzeria')) {
     console.log('💈 Procesando como mensaje de barbería');
-    return processBarberAutoReply();
+    return processPizzeriaAutoReply();
   }
 
   // Si no es ninguno, devolver el mensaje de bienvenida
-  return `Hola 👋🏼
-Esta es un mensaje automático de bienvenida`;
+  return 'Hola 👋🏼\n\nEsta es un mensaje automático de bienvenida';
 }
 
-// Mensaje de auto-respuesta para barbería (original)
-export function processBarberAutoReply(): string {
-  return `‍💈 Gracias por escribirnos ‍💈
-
-Para agendar una cita de barbería visita el link:
-https://kapsalon.vercel.app/
-
-Para *reagendar* o *cancelar* una cita, utiliza los botones que fueron enviados en el mensaje de confirmación.
-
-¡Te esperamos!`;
+export function processPizzeriaAutoReply(): string {
+  return '🍕 Bienvenido a Richezza 🍕\n\n¿qué pizza deseas pedir para hoy?';
 }

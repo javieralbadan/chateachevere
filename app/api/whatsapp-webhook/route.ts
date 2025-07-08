@@ -4,8 +4,6 @@ import { getActiveConversationsStats } from '@/utils/server/restaurant-conversat
 import { getResponseMessage, sendWhatsappTextMessage } from '@/utils/server/whatsapp';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const dynamic = 'force-static';
-export const revalidate = false;
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
 
 // Verificación del webhook - Meta realiza request GET al Callback URL
