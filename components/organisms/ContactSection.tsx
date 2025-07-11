@@ -1,6 +1,6 @@
 'use client';
 import useFetchData from '@/hooks/useFetchData';
-import { FiPhone, FiMapPin, FiClock } from 'react-icons/fi';
+import { FiClock, FiMapPin, FiPhone } from 'react-icons/fi';
 import Loading from '../atoms/Loading';
 import { WhatsappButton } from '../molecules/WhatsappButton';
 
@@ -12,7 +12,9 @@ export const ContactSection = () => {
   return (
     <section id="contact" className="section-padding bg-white">
       <div className="container mx-auto text-center">
-        <h2 className="text-8xl text-primary-color mb-6">Información de Contacto</h2>
+        <h2 className="text-5xl sm:text-6xl md:text-7xl text-primary-color mb-6">
+          Información de Contacto
+        </h2>
 
         <div className="flex flex-col md:flex-row">
           <div className="md:w-1/2 mx-auto mb-8 md:mb-0">

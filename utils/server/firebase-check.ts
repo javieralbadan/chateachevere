@@ -1,8 +1,8 @@
 /**
- * Utilidad para manejar endpoints que no funcionan en Firebase static export
+ * Manejo de endpoints (en runtime) que no funcionan en Firebase (static export)
  */
 export function isFirebaseStaticExport(): boolean {
-  return process.env.BUILD_TARGET === 'firebase';
+  return process.env.DEPLOY_TARGET === 'firebase' || process.env.VERCEL !== '1'; // Vercel siempre setea esta variable
 }
 
 export function getUnavailableResponse(): Response {

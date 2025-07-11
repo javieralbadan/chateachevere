@@ -1,9 +1,9 @@
 'use client';
 import { ServiceType } from '@/data/types';
+import useFetchData from '@/hooks/useFetchData';
 import Image from 'next/image';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import useFetchData from '@/hooks/useFetchData';
 import { WhatsappButton } from './WhatsappButton';
 
 interface Props {
@@ -21,7 +21,7 @@ export const ServiceContent = ({ service, isEven }: Props) => {
       <DesktopGridGallery images={service.images} serviceName={service.name} />
 
       <div className="flex flex-col w-full container mx-auto justify-center text-center p-6 md:p-12 space-y-4 md:space-y-6">
-        <h2 className="text-6xl md:text-8xl">{service.name}</h2>
+        <h2 className="text-5xl sm:text-6xl md:text-7xl">{service.name}</h2>
         <p className="text-base md:text-lg leading-relaxed">{service.description}</p>
 
         <div className="font-semibold text-lg">

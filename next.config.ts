@@ -1,16 +1,9 @@
 import type { NextConfig } from 'next';
 
-// Detectar el entorno de deployment
-const isFirebase =
-  process.env.BUILD_TARGET === 'firebase' ||
-  process.env.FIREBASE_CLI === 'true' ||
-  process.env.npm_lifecycle_event === 'build:firebase';
-
-console.log('🚀 Build environment:', {
-  isFirebase,
-  BUILD_TARGET: process.env.BUILD_TARGET,
-  npm_lifecycle_event: process.env.npm_lifecycle_event,
-});
+// Detectar el entorno de deployment - En build time
+const DEPLOY_TARGET = process.env.DEPLOY_TARGET;
+const isFirebase = typeof window === 'undefined' && DEPLOY_TARGET === 'firebase';
+if (isFirebase) console.log('🚀 DEPLOY_TARGET isFirebase 🔥');
 
 const nextConfig: NextConfig = {
   // Solo usar export para Firebase

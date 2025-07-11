@@ -6,9 +6,14 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/api/**"
     ],
     "rewrites": [
+      {
+        "source": "/api/**",
+        "destination": "https://chatea-chevere.vercel.app/api/**"
+      },
       {
         "source": "**",
         "destination": "/index.html"

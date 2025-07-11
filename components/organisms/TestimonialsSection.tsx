@@ -14,7 +14,7 @@ export const TestimonialsSection = () => {
   return (
     <section className="py-16 bg-[var(--off-white)]">
       <div className="container mx-auto text-center">
-        <h2 className="text-8xl">Testimonios</h2>
+        <h2 className="text-5xl sm:text-6xl md:text-7xl">Testimonios</h2>
         <Carousel
           autoPlay
           infiniteLoop

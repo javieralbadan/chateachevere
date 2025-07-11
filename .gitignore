@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# build & deploy
+__api_temp__/
+
 # next.js
 /.next/
 /out/

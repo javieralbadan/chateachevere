@@ -5,11 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:firebase": "BUILD_TARGET=firebase next build",
     "build:vercel": "next build",
+
+    "preexport:firebase": "rm -rf ./__api_temp__ && mv ./app/api ./__api_temp__",
+    "postexport:firebase": "mv ./__api_temp__ ./app/api",
+    "build:firebase": "npm run preexport:firebase && DEPLOY_TARGET=firebase next build",
+    "deploy:firebase": "npm run build:firebase && firebase deploy --project chateachevere && npm run postexport:firebase",
+
     "start": "next start",
     "lint": "next lint",
-    "deploy:firebase": "npm run build:firebase && firebase deploy --project chateachevere",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx}\"",
     "format:check": "prettier --check \"./**/*.{js,jsx,ts,tsx}\"",
     "typecheck": "tsc --noEmit",
