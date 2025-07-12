@@ -1,9 +1,9 @@
 'use client';
 import fallbackDataImport from '@/data/fallback-data';
-import { ValidEndpoint, EndpointDataMap } from '@/data/types';
-import { useEffect, useState } from 'react';
-import { DATA_SOURCE_MAP } from '@/utils/constants';
+import { EndpointDataMap, ValidEndpoint } from '@/data/types';
 import { validators } from '@/data/validators';
+import { DATA_SOURCE_MAP } from '@/utils/constants';
+import { useEffect, useState } from 'react';
 
 const isDev = process.env.NODE_ENV === 'development';
 const fallbackData = fallbackDataImport as EndpointDataMap;

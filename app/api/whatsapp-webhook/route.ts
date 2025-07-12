@@ -1,6 +1,6 @@
+import { getActiveConversationsStats } from '@/services/tenants/cheefoodies/conversation-handler';
 import { WhatsAppWebhookBody } from '@/types/whatsapp';
 import { getUnavailableResponse, isFirebaseStaticExport } from '@/utils/server/firebase-check';
-import { getActiveConversationsStats } from '@/utils/server/restaurant-conversation';
 import { getResponseMessage, sendWhatsappTextMessage } from '@/utils/server/whatsapp';
 import { NextRequest, NextResponse } from 'next/server';
 

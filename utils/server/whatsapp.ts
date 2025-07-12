@@ -1,14 +1,14 @@
 import {
+  hasActiveConversation,
+  processMessage,
+} from '@/services/tenants/cheefoodies/conversation-handler';
+import {
   WhatsAppTemplateMessage,
   WhatsAppTemplateRequest,
   WhatsAppTextMessage,
   WhatsAppTextRequest,
 } from '@/types/whatsapp';
 import { formatPhoneNumber } from '@/utils/formatters';
-import {
-  hasActiveRestaurantConversation,
-  processRestaurantMessage,
-} from './restaurant-conversation';
 
 const WHATSAPP_API_URL = 'https://graph.facebook.com/v22.0';
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -113,9 +113,9 @@ export function getResponseMessage(phoneNumber: string, incomingMessage: string)
   const lowerMessage = incomingMessage.toLowerCase();
 
   // Verificar si es una conversación de restaurante (nueva o existente)
-  if (lowerMessage.includes('restaurante') || hasActiveRestaurantConversation(phoneNumber)) {
+  if (lowerMessage.includes('restaurante') || hasActiveConversation(phoneNumber)) {
     console.log('🍽️ Procesando como conversación de restaurante');
-    return processRestaurantMessage(phoneNumber, incomingMessage);
+    return processMessage(phoneNumber, incomingMessage);
   }
 
   // Verificar si es una conversación de restaurante (nueva o existente)
