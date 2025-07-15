@@ -6,12 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "build:vercel": "next build",
-
     "preexport:firebase": "rm -rf ./__api_temp__ && mv ./app/api ./__api_temp__",
     "postexport:firebase": "mv ./__api_temp__ ./app/api",
     "build:firebase": "npm run preexport:firebase && DEPLOY_TARGET=firebase next build",
     "deploy:firebase": "npm run build:firebase && firebase deploy --project chateachevere && npm run postexport:firebase",
-
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx}\"",
@@ -22,6 +20,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@vercel/kv": "^3.0.0",
     "antd": "^5.20.3",
     "luxon": "^3.6.1",
     "next": "^15.3.5",

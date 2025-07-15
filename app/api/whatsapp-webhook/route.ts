@@ -1,4 +1,3 @@
-import { getActiveConversationsStats } from '@/services/tenants/cheefoodies/conversation-handler';
 import { WhatsAppWebhookBody } from '@/types/whatsapp';
 import { getUnavailableResponse, isFirebaseStaticExport } from '@/utils/server/firebase-check';
 import { getResponseMessage, sendWhatsappTextMessage } from '@/utils/server/whatsapp';
@@ -34,7 +33,6 @@ export async function POST(request: NextRequest) {
   try {
     const jsonData: unknown = await request.json();
     const body = jsonData as WhatsAppWebhookBody;
-    console.log('📲 [Webhook POST] Full request body:', JSON.stringify(jsonData, null, 2));
 
     if (body.object === 'whatsapp_business_account') {
       const changes = body.entry?.[0]?.changes?.[0];
@@ -44,16 +42,14 @@ export async function POST(request: NextRequest) {
         if (messages && messages.length > 0) {
           for (const message of messages) {
             if (message.type === 'text' && message.text && message.text.body) {
-              // await sendAutoReply(message.from);
+              console.log(`[Webhook POST] From: ${message.from}. Message: "${message.text.body}"`);
+              console.log('[Webhook POST] Full request body:', JSON.stringify(jsonData, null, 2));
               await sendIntelligentReply(message.from, message.text.body);
             }
           }
         }
       }
     }
-
-    const stats = getActiveConversationsStats();
-    console.log('📊 Stats:', stats);
 
     return new NextResponse('Webhook received', { status: 200 });
   } catch (error) {
@@ -63,13 +59,9 @@ export async function POST(request: NextRequest) {
 }
 
 async function sendIntelligentReply(phoneNumber: string, incomingMessage: string) {
-  console.log(
-    `📥 [Webhook POST] sendIntelligentReply ~ from: ${phoneNumber}, message: "${incomingMessage}"`,
-  );
-
   try {
     // Obtener la respuesta apropiada basada en el mensaje y contexto
-    const responseMessage = getResponseMessage(phoneNumber, incomingMessage);
+    const responseMessage = await getResponseMessage(phoneNumber, incomingMessage);
 
     // Enviar el mensaje de respuesta
     await sendWhatsappTextMessage({

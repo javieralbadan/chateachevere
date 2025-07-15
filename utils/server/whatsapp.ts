@@ -1,6 +1,6 @@
 import {
-  hasActiveConversation,
-  processMessage,
+  conversationHandler,
+  hasActiveConvo,
 } from '@/services/tenants/cheefoodies/conversation-handler';
 import {
   WhatsAppTemplateMessage,
@@ -30,7 +30,7 @@ export async function sendWhatsappTextMessage({
   if (!validateConfig()) throw new Error('WhatsApp API configuración incompleta');
 
   const formattedPhone = formatPhoneNumber(to);
-  console.log(`📧 Enviando mensaje a ${formattedPhone} con mensaje ${message}`);
+  console.log(`📧 Enviando mensaje de texto ${message}`);
 
   const bodyRequest: WhatsAppTextRequest = {
     messaging_product: 'whatsapp',
@@ -54,7 +54,7 @@ export async function sendWhatsappTemplateMessage({
   if (!validateConfig()) throw new Error('WhatsApp API configuration incomplete');
 
   const formattedPhone = formatPhoneNumber(to);
-  console.log(`💌 Enviando mensaje a ${formattedPhone} con template ${templateName}`);
+  console.log(`💌 Enviando mensaje de plantilla (template ${templateName})`);
 
   const bodyRequest: WhatsAppTemplateRequest = {
     messaging_product: 'whatsapp',
@@ -108,19 +108,22 @@ async function sendMessage({ bodyRequest, formattedPhone }: SendMessageProps) {
 }
 
 // Función principal para obtener el mensaje de respuesta apropiado
-export function getResponseMessage(phoneNumber: string, incomingMessage: string): string {
-  console.log(`🔄 Procesando mensaje de ${phoneNumber}: "${incomingMessage}"`);
+export async function getResponseMessage(
+  phoneNumber: string,
+  incomingMessage: string,
+): Promise<string> {
   const lowerMessage = incomingMessage.toLowerCase();
+  const isRestaurantActive = await hasActiveConvo(phoneNumber);
 
   // Verificar si es una conversación de restaurante (nueva o existente)
-  if (lowerMessage.includes('restaurante') || hasActiveConversation(phoneNumber)) {
+  if (isRestaurantActive || lowerMessage.includes('restaurante')) {
     console.log('🍽️ Procesando como conversación de restaurante');
-    return processMessage(phoneNumber, incomingMessage);
+    return await conversationHandler(phoneNumber, incomingMessage);
   }
 
-  // Verificar si es una conversación de restaurante (nueva o existente)
+  // Verificar si es una conversación de pizzeria (nueva o existente)
   if (lowerMessage.includes('pizzeria')) {
-    console.log('💈 Procesando como mensaje de barbería');
+    console.log('🍕 Procesando como mensaje de pizzeria');
     return processPizzeriaAutoReply();
   }
 

@@ -1,5 +1,5 @@
 import { formatPrice } from '../utils';
-import { UserConversation } from './conversation';
+import { BaseConversation } from './conversation';
 
 export interface CartItem {
   name: string;
@@ -7,6 +7,14 @@ export interface CartItem {
   price: number;
   category: string;
   itemIndex: number;
+}
+
+// Extender BaseConversation para incluir los campos específicos del carrito
+export interface CartConversation extends BaseConversation {
+  cart: CartItem[];
+  selectedCategory?: string;
+  selectedItem?: string;
+  selectedItemIndex?: number;
 }
 
 export function calculateCartTotal(cart: CartItem[]): number {
@@ -19,23 +27,21 @@ export function calculateDeliveryTotal(cart: CartItem[], deliveryCost: number): 
 }
 
 interface HandleQuantitySelectionProps {
-  conversation: UserConversation;
-  message: string;
+  conversation: CartConversation;
+  quantity: number;
   price: number;
   deliveryCost: number;
-  updateConversationFn: (cartItem: CartItem) => void;
+  updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
 }
 
 // Manejar selección de cantidad
-export function handleQuantitySelection({
+export async function handleQuantitySelection({
   conversation,
-  message,
+  quantity,
   price,
   deliveryCost,
   updateConversationFn,
-}: HandleQuantitySelectionProps): string {
-  const quantity = parseInt(message.trim());
-
+}: HandleQuantitySelectionProps): Promise<string> {
   if (
     quantity >= 1 &&
     quantity <= 10 &&
@@ -51,9 +57,10 @@ export function handleQuantitySelection({
       category: conversation.selectedCategory,
       itemIndex: conversation.selectedItemIndex,
     };
-    updateConversationFn(cartItem);
+    const updatedCart = [...conversation.cart, cartItem];
+    await updateConversationFn({ cart: updatedCart });
 
-    return getCartActionsMessage(conversation.cart, deliveryCost);
+    return getCartActionsMessage(updatedCart, deliveryCost);
   }
 
   return '❌ Cantidad no válida. Por favor ingresa un número entre 1 y 10.';
@@ -89,27 +96,27 @@ function getCartActionsMessage(cart: CartItem[], deliveryCost: number): string {
 }
 
 interface HandleCartActionsProps {
-  conversation: UserConversation;
+  conversation: CartConversation;
   option: number;
   deliveryCost: number;
   transfersPhoneNumber: string;
-  updateConversationFn: (updates: Partial<UserConversation>) => void;
+  updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
   getWelcomeMessageFn: () => string;
 }
 
 // Manejar acciones del carrito
-export function handleCartActions({
+export async function handleCartActions({
   conversation,
   option,
   deliveryCost,
   transfersPhoneNumber,
   updateConversationFn,
   getWelcomeMessageFn,
-}: HandleCartActionsProps): string {
+}: HandleCartActionsProps): Promise<string> {
   switch (option) {
     case 1:
       // Agregar más productos
-      updateConversationFn({ step: 'welcome' });
+      await updateConversationFn({ step: 'welcome' });
       return getWelcomeMessageFn();
 
     case 2:
@@ -117,7 +124,7 @@ export function handleCartActions({
       if (conversation.cart.length === 0) {
         return `❌ Tu carrito está vacío.!\n\n${getWelcomeMessageFn()}`;
       }
-      updateConversationFn({ step: 'checkout' });
+      await updateConversationFn({ step: 'checkout' });
       return getCheckoutMessage({
         cart: conversation.cart,
         deliveryCost,
@@ -126,7 +133,7 @@ export function handleCartActions({
 
     case 3:
       // Vaciar carrito
-      updateConversationFn({ cart: [], step: 'welcome' });
+      await updateConversationFn({ cart: [], step: 'welcome' });
       return `🗑️ Carrito vaciado!\n\n${getWelcomeMessageFn()}`;
 
     default:
@@ -177,41 +184,39 @@ function getCheckoutMessage({
 }
 
 interface HandleCheckoutProps {
-  message: string;
-  conversation: UserConversation;
+  conversation: CartConversation;
+  option: number;
   deliveryCost: number;
   transfersPhoneNumber: string;
-  updateConversationFn: (updates: Partial<UserConversation>) => void;
+  updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
   getWelcomeMessageFn: () => string;
-  getFinalMessageFn: () => string;
+  getFinalMessageFn: () => Promise<string>;
 }
 
 // Manejar checkout
-export function handleCheckout({
-  message,
+export async function handleCheckout({
   conversation,
+  option,
   deliveryCost,
   transfersPhoneNumber,
   updateConversationFn,
   getWelcomeMessageFn,
   getFinalMessageFn,
-}: HandleCheckoutProps): string {
-  const option = parseInt(message.trim());
-
+}: HandleCheckoutProps): Promise<string> {
   switch (option) {
     case 1:
       // Confirmar pedido
-      updateConversationFn({ step: 'final' });
-      return getFinalMessageFn();
+      await updateConversationFn({ step: 'final' });
+      return await getFinalMessageFn();
 
     case 2:
       // Modificar carrito
-      updateConversationFn({ step: 'cart_actions' });
+      await updateConversationFn({ step: 'cart_actions' });
       return getCartActionsMessage(conversation.cart, deliveryCost);
 
     case 3:
       // Cancelar pedido
-      updateConversationFn({ cart: [], step: 'welcome' });
+      await updateConversationFn({ cart: [], step: 'welcome' });
       return `❌ Pedido cancelado!\n\n${getWelcomeMessageFn()}`;
 
     default:
