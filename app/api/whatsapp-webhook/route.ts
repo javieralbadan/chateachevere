@@ -1,8 +1,10 @@
 import { WhatsAppWebhookBody } from '@/types/whatsapp';
+import { handleNextSuccessResponse } from '@/utils/mappers/nextResponse';
 import { getUnavailableResponse, isFirebaseStaticExport } from '@/utils/server/firebase-check';
 import { getResponseMessage, sendWhatsappTextMessage } from '@/utils/server/whatsapp';
 import { NextRequest, NextResponse } from 'next/server';
 
+const isDev = process.env.NODE_ENV === 'development';
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
 
 // Verificación del webhook - Meta realiza request GET al Callback URL
@@ -44,7 +46,12 @@ export async function POST(request: NextRequest) {
             if (message.type === 'text' && message.text && message.text.body) {
               console.log(`[Webhook POST] From: ${message.from}. Message: "${message.text.body}"`);
               console.log('[Webhook POST] Full request body:', JSON.stringify(jsonData, null, 2));
-              await sendIntelligentReply(message.from, message.text.body);
+              if (isDev) {
+                const result = await getResponseMessage(message.from, message.text.body);
+                return handleNextSuccessResponse({ success: true, response: result });
+              } else {
+                await sendIntelligentReply(message.from, message.text.body);
+              }
             }
           }
         }

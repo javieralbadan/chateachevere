@@ -29,14 +29,15 @@ export type StepHandler<T extends BaseConversation> = (
 export interface Conversation<T extends BaseConversation> {
   config: ConversationConfig;
   stepHandlers: Record<string, StepHandler<T>>;
-  defaultStep?: string;
 }
 
 export function createConversationManager<T extends BaseConversation>(
   managerConfig: Conversation<T>,
 ) {
-  const { config, stepHandlers, defaultStep = 'welcome' } = managerConfig;
-  const conversationTimeout = config.timeoutMinutes * 60 * 1000;
+  const { config, stepHandlers } = managerConfig;
+  const conversationTimeout = config.timeoutMinutes * 60; // Para KV (segundos)
+  const conversationTimeoutMs = config.timeoutMinutes * 60 * 1000; // Para validación (milisegundos)
+  console.log('🚀 ~ conversationTimeout:', conversationTimeout);
 
   // Obtener o crear conversación
   const getOrCreateConversation = async (
@@ -53,6 +54,10 @@ export function createConversationManager<T extends BaseConversation>(
       } as T;
 
       console.log('🆕 Create conversation for:', phoneNumber);
+      await kv.set(phoneNumber, conversation, { ex: conversationTimeout });
+    } else {
+      console.log('🔄 Update lastInteraction for:', phoneNumber);
+      conversation.lastInteraction = Date.now();
       await kv.set(phoneNumber, conversation, { ex: conversationTimeout });
     }
 
@@ -88,7 +93,21 @@ export function createConversationManager<T extends BaseConversation>(
   // Verificar si hay una conversación activa
   const hasActiveConversation = async (phoneNumber: string): Promise<boolean> => {
     const conv = await kv.get<T>(phoneNumber);
-    return !!conv;
+
+    if (!conv) {
+      console.log('🧲 conversation isActive? -> no conversation');
+      return false;
+    }
+
+    const now = Date.now();
+    const timeSinceLastInteraction = now - conv.lastInteraction;
+
+    console.log('🚀 ~ hasActiveConversation ~ timeSinceLastInteraction:', timeSinceLastInteraction);
+    console.log('🚀 ~ hasActiveConversation ~ conversationTimeout:', conversationTimeout);
+    const isExpired = timeSinceLastInteraction > conversationTimeoutMs;
+
+    console.log('🧲 conversation isActive? isExpired:', isExpired);
+    return !isExpired;
   };
 
   // Procesar mensaje principal
@@ -101,7 +120,6 @@ export function createConversationManager<T extends BaseConversation>(
     console.log('🚀 conversation processMessage:', { phoneNumber, message });
     const conversation = await getOrCreateConversation(phoneNumber, getInitialConversation());
     const isActive = await hasActiveConversation(phoneNumber);
-    console.log('🧲 conversation isActive:', isActive);
 
     if (!isActive) {
       await clearConversation(phoneNumber);
@@ -109,7 +127,13 @@ export function createConversationManager<T extends BaseConversation>(
     }
 
     if (isDev) console.log('🚀 step:', conversation.step);
-    const handler = stepHandlers[conversation.step] ?? stepHandlers[defaultStep];
+    const handler = stepHandlers[conversation.step];
+    if (!handler) {
+      console.error(`❌ Reiniciar conversación. No hay handler. Step: ${conversation.step}`);
+      await clearConversation(phoneNumber);
+      return getWelcomeMessage();
+    }
+
     // Llamamos siempre con los tres parámetros
     return handler(phoneNumber, message, conversation);
   };

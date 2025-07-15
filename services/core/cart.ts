@@ -31,7 +31,7 @@ interface HandleQuantitySelectionProps {
   quantity: number;
   price: number;
   deliveryCost: number;
-  updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
+  updateConversationFn: (updatedCart: CartItem[]) => Promise<void>;
 }
 
 // Manejar selección de cantidad
@@ -58,7 +58,7 @@ export async function handleQuantitySelection({
       itemIndex: conversation.selectedItemIndex,
     };
     const updatedCart = [...conversation.cart, cartItem];
-    await updateConversationFn({ cart: updatedCart });
+    await updateConversationFn(updatedCart);
 
     return getCartActionsMessage(updatedCart, deliveryCost);
   }

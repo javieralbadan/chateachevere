@@ -43,24 +43,21 @@ const ChatbotTester: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const testPhoneNumber = '573118551830'; // Número de prueba para simular la conversación
-  console.log('🚀 ~ testPhoneNumber:', testPhoneNumber);
-
+  const testPhoneNumber = '573112223344'; // Número de prueba para simular la conversación
   const sendMessage = async () => {
     if (!inputMessage.trim()) return;
+    // 3. Agregar la respuesta del bot al historial
+    const userMessage: Message = { type: 'user', content: inputMessage };
+    setMessages((prev) => [...prev, userMessage]);
+    setInputMessage('');
 
-    console.log('🚀 ~ sendMessage ~ inputMessage:', inputMessage);
     // 1. Agregar el mensaje del usuario al historial
     try {
       const body = getBodyRequest(testPhoneNumber, inputMessage);
-      console.log('🚀 ~ sendMessage ~ body:', body);
       // 2. Procesar el mensaje con la función del chatbot
       const res = await fetch('/api/whatsapp-webhook', {
-        // Ruta de tu API Route
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
@@ -69,22 +66,16 @@ const ChatbotTester: React.FC = () => {
         throw new Error(errorData.error || 'Error al obtener respuesta del bot');
       }
 
-      const data = (await res.json()) as { response: string };
-      const botResponse = data.response;
+      const data = (await res.json()) as { data: { response: string } };
+      const botResponse = data?.data?.response;
 
       // 3. Agregar la respuesta del bot al historial
       const botMessage: Message = { type: 'bot', content: botResponse };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error('UI TEST-Error al enviar mensaje:', error);
-      const errorMessage: Message = {
-        type: 'bot',
-        content: 'Lo siento, hubo un error al procesar tu mensaje.',
-      };
+      const errorMessage: Message = { type: 'bot', content: 'Error en chatbot' };
       setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      // 4. Limpiar el input
-      setInputMessage('');
     }
   };
 

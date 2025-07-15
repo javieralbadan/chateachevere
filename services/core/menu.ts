@@ -28,7 +28,7 @@ export async function handleCategorySelection({
   updateConversationFn,
 }: HandleCategorySelectionProps): Promise<string> {
   console.log('🗃️ handleCategorySelection', message, categories);
-  if (!categories.length && welcomeMessageFn()) {
+  if (!Object.keys(categories).length) {
     return welcomeMessageFn();
   }
 

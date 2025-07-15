@@ -29,7 +29,7 @@ const getInitialRestaurantConversation = (): Omit<
 
 // Crear el manager del restaurante
 const restaurantManager = createConversationManager<RestaurantConversation>({
-  config: { timeoutMinutes: 15 },
+  config: { timeoutMinutes: 7200 },
   stepHandlers: {
     welcome: handleWelcomeResponse,
     category_selection: handleCategorySelectionResponse,
@@ -38,7 +38,6 @@ const restaurantManager = createConversationManager<RestaurantConversation>({
     cart_actions: handleCartActionsResponse,
     checkout: handleCheckoutResponse,
   },
-  defaultStep: 'welcome',
 });
 
 // Mensaje de bienvenida
@@ -123,7 +122,7 @@ async function handleQuantitySelectionResponse(
     updateConversationFn: (updatedCart) =>
       restaurantManager.updateConversation(phoneNumber, {
         step: 'cart_actions',
-        cart: updatedCart as CartItem[],
+        cart: updatedCart,
       }),
   });
 }
@@ -228,12 +227,19 @@ export const conversationHandler = async (
   phoneNumber: string,
   message: string,
 ): Promise<string> => {
-  return restaurantManager.processMessage(
-    phoneNumber,
-    message,
-    getInitialRestaurantConversation,
-    getWelcomeMessage,
-  );
+  try {
+    return await restaurantManager.processMessage(
+      phoneNumber,
+      message,
+      getInitialRestaurantConversation,
+      getWelcomeMessage,
+    );
+  } catch (error) {
+    console.error('❌ Error en conversationHandler:', error);
+    // Limpiar conversación corrupta y reiniciar
+    await restaurantManager.clearConversation(phoneNumber);
+    return getWelcomeMessage('❌ Ocurrió un error. Reiniciando...');
+  }
 };
 
 // Funciones útiles para UI Test
