@@ -22,6 +22,7 @@
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@vercel/kv": "^3.0.0",
     "antd": "^5.20.3",
+    "firebase": "^11.10.0",
     "luxon": "^3.6.1",
     "next": "^15.3.5",
     "react": "^19.0.0",
