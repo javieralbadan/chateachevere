@@ -1,3 +1,4 @@
+import { GetWelcomeMessageFn } from '../tenants/cheefoodies/conversation-handler';
 import { formatPrice } from '../utils';
 import { BaseConversation } from './conversation';
 
@@ -22,6 +23,10 @@ export function calculateCartTotal(cart: CartItem[]): number {
 }
 
 export function calculateDeliveryTotal(cart: CartItem[], deliveryCost: number): number {
+  if (!deliveryCost) {
+    return 0;
+  }
+
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
   return deliveryCost * totalItems;
 }
@@ -101,7 +106,10 @@ interface HandleCartActionsProps {
   deliveryCost: number;
   transfersPhoneNumber: string;
   updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
-  getWelcomeMessageFn: () => string;
+  welcomeMessageFn: GetWelcomeMessageFn;
+  // TODO: Crear otra Fn "addMoreItemsFn"
+  // para gestionar arriba (convo-handler) el texto '¿Qué más deseas pedir'
+  // y llamar el handleWelcomeResponse que es quien actualiza el step a category_selection
 }
 
 // Manejar acciones del carrito
@@ -111,19 +119,21 @@ export async function handleCartActions({
   deliveryCost,
   transfersPhoneNumber,
   updateConversationFn,
-  getWelcomeMessageFn,
+  welcomeMessageFn,
 }: HandleCartActionsProps): Promise<string> {
   switch (option) {
     case 1:
       // Agregar más productos
+      // TODO: Fix this
       await updateConversationFn({ step: 'welcome' });
-      return getWelcomeMessageFn();
+      return welcomeMessageFn('¿Qué más deseas pedir?', false);
 
     case 2:
       // Proceder al checkout
       if (conversation.cart.length === 0) {
-        return `❌ Tu carrito está vacío.!\n\n${getWelcomeMessageFn()}`;
+        return welcomeMessageFn('❌ Tu carrito está vacío!');
       }
+
       await updateConversationFn({ step: 'checkout' });
       return getCheckoutMessage({
         cart: conversation.cart,
@@ -133,8 +143,10 @@ export async function handleCartActions({
 
     case 3:
       // Vaciar carrito
+      // TODO: Borrar selectedCategory, selectedItem & selectedItemIndex
+      // Unir con el case 3 del checkout?
       await updateConversationFn({ cart: [], step: 'welcome' });
-      return `🗑️ Carrito vaciado!\n\n${getWelcomeMessageFn()}`;
+      return welcomeMessageFn('🗑️ Carrito vaciado!');
 
     default:
       return `❌ Opción no válida.\n\n${getCartActionsMessage(conversation.cart, deliveryCost)}`;
@@ -189,8 +201,8 @@ interface HandleCheckoutProps {
   deliveryCost: number;
   transfersPhoneNumber: string;
   updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
-  getWelcomeMessageFn: () => string;
-  getFinalMessageFn: () => Promise<string>;
+  welcomeMessageFn: GetWelcomeMessageFn;
+  finalMessageFn: () => Promise<string>;
 }
 
 // Manejar checkout
@@ -200,24 +212,26 @@ export async function handleCheckout({
   deliveryCost,
   transfersPhoneNumber,
   updateConversationFn,
-  getWelcomeMessageFn,
-  getFinalMessageFn,
+  welcomeMessageFn,
+  finalMessageFn,
 }: HandleCheckoutProps): Promise<string> {
   switch (option) {
     case 1:
       // Confirmar pedido
       await updateConversationFn({ step: 'final' });
-      return await getFinalMessageFn();
+      return await finalMessageFn();
 
     case 2:
       // Modificar carrito
+      // TODO: Fix this
       await updateConversationFn({ step: 'cart_actions' });
       return getCartActionsMessage(conversation.cart, deliveryCost);
 
     case 3:
       // Cancelar pedido
+      // TODO: Borrar selectedCategory, selectedItem & selectedItemIndex
       await updateConversationFn({ cart: [], step: 'welcome' });
-      return `❌ Pedido cancelado!\n\n${getWelcomeMessageFn()}`;
+      return welcomeMessageFn('❌ Pedido cancelado!');
 
     default:
       return `❌ Opción no válida.\n\n${getCheckoutMessage({

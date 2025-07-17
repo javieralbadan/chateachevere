@@ -1,3 +1,4 @@
+import { GetWelcomeMessageFn } from '../tenants/cheefoodies/conversation-handler';
 import { formatPrice } from '../utils';
 
 export interface MenuItem {
@@ -17,7 +18,7 @@ export interface MenuCategory {
 interface HandleCategorySelectionProps {
   message: string;
   categories: Record<string, MenuCategory>;
-  welcomeMessageFn: (msgPreliminar?: string) => string;
+  welcomeMessageFn: GetWelcomeMessageFn;
   updateConversationFn: (selectedCategoryKey: string) => Promise<void>;
 }
 // Manejar respuesta de selección de categoria
@@ -89,7 +90,7 @@ function generateOptionsMessage({
 interface HandleItemSelectionProps {
   message: string;
   category: MenuCategory;
-  welcomeMessageFn: () => string;
+  welcomeMessageFn: GetWelcomeMessageFn;
   updateConversationFn: (option: number, selectedItem: MenuItem) => Promise<void>;
 }
 export async function handleItemSelection({

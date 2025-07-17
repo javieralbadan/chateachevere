@@ -1,6 +1,4 @@
 import {
-  calculateCartTotal,
-  calculateDeliveryTotal,
   CartItem,
   handleCartActions,
   handleCheckout,
@@ -8,7 +6,7 @@ import {
 } from '@/services/core/cart';
 import { BaseConversation, createConversationManager } from '@/services/core/conversation';
 import { handleCategorySelection, handleItemSelection } from '@/services/core/menu';
-import { formatPrice } from '@/services/utils';
+import { createOrder, storeOrderInDB, TenantInfo } from '@/services/core/order';
 import { Category, TENANT_CONFIG } from './config';
 
 export interface RestaurantConversation extends BaseConversation {
@@ -40,13 +38,18 @@ const restaurantManager = createConversationManager<RestaurantConversation>({
   },
 });
 
+export type GetWelcomeMessageFn = (msgPreliminar?: string, greeting?: boolean) => string;
+
 // Mensaje de bienvenida
-const getWelcomeMessage = (msgPreliminar: string = ''): string => {
+const getWelcomeMessage: GetWelcomeMessageFn = (msgPreliminar = '', greeting = true) => {
   console.log('👋🏼 getWelcomeMessage');
   const categories = Object.keys(TENANT_CONFIG.categories);
   let message = msgPreliminar ? `${msgPreliminar}\n\n` : '';
-  // prettier-ignore
-  message += '🍽️ Bienvenido a CheFoodie\'s, ¿qué deseas pedir?\n\n';
+
+  if (greeting) {
+    // prettier-ignore
+    message += '🍽️ Bienvenido a CheFoodie\'s, ¿qué deseas pedir?\n\n';
+  }
 
   categories.forEach((key, index) => {
     const category = TENANT_CONFIG.categories[key];
@@ -140,7 +143,7 @@ async function handleCartActionsResponse(
     transfersPhoneNumber: TENANT_CONFIG.transfersPhoneNumber,
     updateConversationFn: (upd: Partial<RestaurantConversation>) =>
       restaurantManager.updateConversation(phoneNumber, upd),
-    getWelcomeMessageFn: getWelcomeMessage,
+    welcomeMessageFn: getWelcomeMessage,
   });
 }
 
@@ -157,32 +160,35 @@ async function handleCheckoutResponse(
     transfersPhoneNumber: TENANT_CONFIG.transfersPhoneNumber,
     updateConversationFn: (upd: Partial<RestaurantConversation>) =>
       restaurantManager.updateConversation(phoneNumber, upd),
-    getWelcomeMessageFn: getWelcomeMessage,
-    getFinalMessageFn: () => getFinalMessage(phoneNumber, conversation.cart),
+    welcomeMessageFn: getWelcomeMessage,
+    finalMessageFn: () => getFinalMessage(phoneNumber, conversation.cart),
   });
 }
 
 // Mensaje final
 const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Promise<string> => {
   console.log('🏁 getFinalMessage');
-  const total = calculateCartTotal(cart) + calculateDeliveryTotal(cart, TENANT_CONFIG.deliveryCost);
-  const orderNumber = Date.now().toString().slice(-6);
+  const tenantInfo: TenantInfo = {
+    name: 'cheefoodies',
+    transfersPhoneNumber: TENANT_CONFIG.transfersPhoneNumber,
+    deliveryCost: TENANT_CONFIG.deliveryCost,
+  };
+  const orderData = createOrder({ tenantInfo, phoneNumber, cart });
+  const orderId = await storeOrderInDB(orderData);
+  console.log('🚀 ~ getFinalMessage ~ orderId, orderData:', orderId, orderData);
 
-  // Generar resumen del pedido para WhatsApp
-  const orderSummary = generateOrderSummary(cart, total, orderNumber);
-
-  // Generar URL de WhatsApp con mensaje pre-formateado
-  const whatsappUrl = `https://wa.me/${TENANT_CONFIG.transfersPhoneNumber}?text=${encodeURIComponent(orderSummary)}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://chatea-chevere.vercel.app';
+  const shortUrl = `${baseUrl}/api/pedido/${orderId}`;
 
   let message = '*FINALIZACIÓN DE PEDIDO*\n\n';
-  message += `📝 *Número de pedido:* #${orderNumber}\n`;
-  message += `💰 *Total:* ${formatPrice(total)}\n`;
+  message += `📝 *Número de pedido:* #${orderData.orderNumber}\n`;
+  message += `💰 *Total:* ${orderData.total}\n`;
   message += '⏱️ *Tiempo estimado:* 30-45 minutos\n\n';
 
   message += '▶️▶️ *CONFIRMAR PEDIDO* ◀️◀️\n';
   message +=
     'Para finalizar tu pedido y enviar el comprobante de pago, haz clic en este enlace:\n\n';
-  message += `${whatsappUrl}\n\n`;
+  message += `${shortUrl}\n\n`;
 
   message += '📋 *Recuerda incluir:*\n';
   message += '• Comprobante de pago\n';
@@ -195,32 +201,6 @@ const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Promise<s
 
   return message;
 };
-
-function generateOrderSummary(cart: CartItem[], total: number, orderNumber: string): string {
-  console.log('📋 generateOrderSummary');
-  let summary = `🍽️ *NUEVO PEDIDO #${orderNumber}*\n`;
-  summary += `${new Date().toLocaleString('es-CO')}\n\n`;
-
-  summary += '📋 *DETALLE DEL PEDIDO:*\n';
-  cart.forEach((item) => {
-    const itemTotal = item.price * item.quantity;
-    summary += `👉🏼 ${item.name}\n`;
-    summary += `${item.quantity} x ${formatPrice(item.price)} = ${formatPrice(itemTotal)}\n\n`;
-  });
-
-  const subtotal = calculateCartTotal(cart);
-  const deliveryTotal = calculateDeliveryTotal(cart, TENANT_CONFIG.deliveryCost);
-
-  summary += '💰 *RESUMEN DE PAGO:*\n';
-  summary += `Subtotal: ${formatPrice(subtotal)}\n`;
-  summary += `Domicilio: ${formatPrice(deliveryTotal)}\n`;
-  summary += `*TOTAL: ${formatPrice(total)}*\n\n`;
-
-  summary += 'Por favor envia este mensaje (sin modificar)\n';
-  summary += 'Seguidamente, envía tu nombre, teléfono, dirección y adjunta imagen de transferencia';
-
-  return summary;
-}
 
 // Función principal para ser usada en el webhook
 export const conversationHandler = async (
