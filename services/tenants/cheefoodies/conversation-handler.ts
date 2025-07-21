@@ -11,6 +11,7 @@ import type {
   TenantHandler,
   TenantInfo,
 } from '@/services/core/types';
+import { formatPrice } from '@/services/utils';
 import { Category, TENANT_CONFIG } from './config';
 
 let categoriesListString = '';
@@ -168,7 +169,7 @@ const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Promise<s
 
   let message = '*FINALIZACIÓN DE PEDIDO*\n\n';
   message += `📝 *Número de pedido:* #${orderData.orderNumber}\n`;
-  message += `💰 *Total:* ${orderData.total}\n`;
+  message += `💰 *Total:* ${formatPrice(orderData.total)}\n`;
   message += '⏱️ *Tiempo estimado:* 30-45 minutos\n\n';
 
   message += '▶️▶️ *CONFIRMAR PEDIDO* ◀️◀️\n';
@@ -188,8 +189,6 @@ const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Promise<s
   return message;
 };
 
-// Funciones útiles para UI Test
-export const UIClearConversation = (phone: string) => restaurantManager.clearConversation(phone);
 export const hasActiveConvo = (phone: string) => restaurantManager.hasActiveConversation(phone);
 
 // Función para obtener conversación inicial del restaurante

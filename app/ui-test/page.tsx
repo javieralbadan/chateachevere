@@ -2,13 +2,27 @@
 import { SendOutlined } from '@ant-design/icons';
 import { Button, Card, Input, List, Typography } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
+import reactStringReplace from 'react-string-replace';
 
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 interface Message {
   type: 'user' | 'bot';
   content: string;
 }
+
+const MESSAGE = {
+  user: {
+    align: 'text-right',
+    color: '#e6f7ff',
+    text: 'Tú:',
+  },
+  bot: {
+    align: 'text-left',
+    color: '#f6ffed',
+    text: 'Bot:',
+  },
+};
 
 const getBodyRequest = (phoneNumber: string, inputMessage: string) => ({
   object: 'whatsapp_business_account',
@@ -87,37 +101,27 @@ const ChatbotTester: React.FC = () => {
     if (e.key === 'Enter') await sendMessage(); // Manejar el Enter
   };
 
-  // const resetConversation = async () => {
-  //   await UIClearConversation(testPhoneNumber);
-  //   const welcomeMessage = await getResponseMessage(testPhoneNumber, '');
-  //   setMessages([{ type: 'bot', content: welcomeMessage }]);
-  // };
-
   return (
-    <Card
-      title="CheFoodie's Chatbot Test"
-      className="w-[400px] my-8 mx-auto"
-      // extra={<Button onClick={() => void resetConversation()}>Reiniciar</Button>}
-    >
+    <Card title="CheFoodie's Chatbot Test" className="w-[400px] my-8 mx-auto">
       <div className="h-[500px] overflow-y-scroll py-2 scrollbar-hide">
         <List
           dataSource={messages}
           renderItem={(item) => (
-            <div className={`mb-4 ${item.type === 'user' ? 'text-right' : 'text-left'}`}>
+            <div className={`mb-4 ${MESSAGE[item.type].align}`}>
               <Card
                 size="small"
-                style={{
-                  display: 'inline-block',
-                  maxWidth: '80%',
-                  backgroundColor: item.type === 'user' ? '#e6f7ff' : '#f6ffed',
-                  border: 'none',
-                }}
+                className="inline-block max-w-[80%] [&_.ant-card-body]:!py-2 border-none"
+                style={{ backgroundColor: MESSAGE[item.type].color }}
               >
-                <Paragraph className="whitespace-pre-wrap m-0">
-                  <Text strong>{item.type === 'user' ? 'Tú:' : 'Bot:'}</Text>
+                <div className="whitespace-pre-wrap m-0">
+                  <Text strong>{MESSAGE[item.type].text}</Text>
                   <br />
-                  {item.content}
-                </Paragraph>
+                  {reactStringReplace(item.content, /\*(.*?)\*/g, (match, i) => (
+                    <Text strong key={i}>
+                      {match}
+                    </Text>
+                  ))}
+                </div>
               </Card>
             </div>
           )}

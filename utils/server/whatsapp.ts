@@ -119,10 +119,8 @@ export async function getResponseMessage(
 
   const lowerMessage = incomingMessage.toLowerCase();
   try {
-    const isRestaurantActive = await hasActiveConvo(phoneNumber);
-    console.log('> isRestaurantActive, lowerMessage:', isRestaurantActive, lowerMessage);
-
     // Verificar si es una conversación de restaurante (nueva o existente)
+    const isRestaurantActive = await hasActiveConvo(phoneNumber);
     if (isRestaurantActive || lowerMessage.includes('restaurante')) {
       console.log('🍽️ Procesando como conversación de restaurante');
       return await conversationHandler(phoneNumber, incomingMessage);

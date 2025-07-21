@@ -1,6 +1,5 @@
 import type { TenantConfig } from '@/services/core/types';
 
-// TODO: Cargar esto desde un Gist
 // Configuración del menú - Fuente única de verdad
 export const TENANT_CONFIG: TenantConfig = {
   transfersPhoneNumber: '573112112565', // Número en formato: código país + número
