@@ -120,8 +120,7 @@ export async function getResponseMessage(
   const lowerMessage = incomingMessage.toLowerCase();
   try {
     const isRestaurantActive = await hasActiveConvo(phoneNumber);
-    console.log('🍽️ isRestaurantActive:', isRestaurantActive);
-    console.log('💬 lowerMessage:', lowerMessage);
+    console.log('> isRestaurantActive, lowerMessage:', isRestaurantActive, lowerMessage);
 
     // Verificar si es una conversación de restaurante (nueva o existente)
     if (isRestaurantActive || lowerMessage.includes('restaurante')) {
@@ -136,7 +135,7 @@ export async function getResponseMessage(
     }
 
     // Si no es ninguno, devolver el mensaje de bienvenida
-    return 'Hola 👋🏼\n\nEsta es un mensaje automático de bienvenida';
+    return '👋🏼 Hola. Este es un mensaje automático de bienvenida.\n\nEscribe *"restaurante"* para probar una conversación que finaliza redirigiendo a otro whatsapp para control de pedidos y pagos.';
   } catch (error) {
     console.error('❌ Error en getResponseMessage:', error);
     return 'Lo siento, ocurrió un error. Intenta nuevamente.';

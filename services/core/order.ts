@@ -1,36 +1,7 @@
-import { addDoc, collection, db, doc, getDoc } from '@/utils/firebase';
-import { formatPrice } from '../utils';
-import { calculateCartTotal, calculateDeliveryTotal, CartItem } from './cart';
-
-const isDev = process.env.NODE_ENV === 'development';
-
-export interface TenantInfo {
-  name: string;
-  transfersPhoneNumber: string;
-  deliveryCost: number;
-}
-
-export interface CreateOrderProps {
-  tenantInfo: TenantInfo;
-  phoneNumber: string;
-  cart: CartItem[];
-}
-
-export interface OrderData {
-  id?: string;
-  customerPhoneNumber: string;
-  tenant: string;
-  transfersPhoneNumber: string;
-  orderNumber: string;
-  cart: CartItem[];
-  subtotal: number;
-  deliveryTotal: number;
-  total: number;
-  isTest: boolean;
-  createdAt: number;
-  status?: 'pending' | 'confirmed' | 'preparing' | 'delivered' | 'cancelled';
-  customerName?: string;
-}
+import { db, Timestamp } from '@/utils/firebase';
+import { formatPrice, isTestingOrder } from '../utils';
+import { calculateCartTotal, calculateDeliveryTotal } from './cart';
+import type { CreateOrderProps, OrderData } from './types';
 
 // Crear objeto order
 export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps): OrderData => {
@@ -38,9 +9,7 @@ export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps)
     const subtotal = calculateCartTotal(cart);
     const deliveryTotal = calculateDeliveryTotal(cart, tenantInfo.deliveryCost);
     const total = subtotal + deliveryTotal;
-    // TODO: Definir si se crea ese order id o el de firestore
     const orderNumber = Date.now().toString().slice(-6);
-    const now = Date.now();
 
     const orderData: OrderData = {
       tenant: tenantInfo.name,
@@ -52,36 +21,36 @@ export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps)
       subtotal,
       deliveryTotal,
       status: 'pending',
-      isTest: isDev,
-      createdAt: now,
+      isTest: isTestingOrder(tenantInfo.name),
+      createdAt: Timestamp.now(),
     };
 
     return orderData;
   } catch (error) {
-    console.error('❌ Error creating order:', error);
+    console.error('❌ Error creando orden:', error);
     throw error;
   }
 };
 
 // Guardar pedido en Firestore
 export const storeOrderInDB = async (orderData: OrderData): Promise<string> => {
+  console.log('📝 Creando orden en Firestore:', orderData);
   try {
-    const docRef = await addDoc(collection(db, 'orders'), orderData);
-    console.log('📝 Order created with ID:', docRef.id);
+    const docRef = await db.collection('orders').add(orderData);
 
     return docRef.id;
   } catch (error) {
-    console.error('❌ Error creating order:', error);
+    console.error('❌ Error guardando orden en DB:', error);
     throw error;
   }
 };
 
 export const getOrderById = async (orderId: string): Promise<OrderData | null> => {
   try {
-    const docRef = doc(db, 'orders', orderId);
-    const docSnap = await getDoc(docRef);
+    const docRef = db.collection('orders').doc(orderId);
+    const docSnap = await docRef.get();
 
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
       return { id: docSnap.id, ...docSnap.data() } as OrderData;
     } else {
       console.log('❌ Pedido no encontrado');
@@ -95,20 +64,19 @@ export const getOrderById = async (orderId: string): Promise<OrderData | null> =
 
 // Obtener mensaje para flujo de reenviar pedido a whatsapp de pagos
 export const generateOrderSummary = (order: OrderData): string => {
-  console.log('📋 generateOrderSummary');
   const { orderNumber, cart, subtotal, deliveryTotal, total } = order;
 
-  let summary = `🍽️ *NUEVO PEDIDO #${orderNumber}*\n`;
+  let summary = `*NUEVO PEDIDO #${orderNumber}*\n`;
   summary += `${new Date().toLocaleString('es-CO')}\n\n`;
 
-  summary += '📋 *DETALLE DEL PEDIDO:*\n';
+  summary += '*DETALLE DEL PEDIDO:*\n';
   cart.forEach((item) => {
     const itemTotal = item.price * item.quantity;
-    summary += `👉🏼 ${item.name}\n`;
+    summary += `- ${item.name}\n`;
     summary += `${item.quantity} x ${formatPrice(item.price)} = ${formatPrice(itemTotal)}\n\n`;
   });
 
-  summary += '💰 *RESUMEN DE PAGO:*\n';
+  summary += '*RESUMEN DE PAGO:*\n';
   summary += `Subtotal: ${formatPrice(subtotal)}\n`;
   summary += `Domicilio: ${formatPrice(deliveryTotal)}\n`;
   summary += `*TOTAL: ${formatPrice(total)}*\n\n`;

@@ -1,35 +1,7 @@
 import { kv } from '@vercel/kv';
+import type { BaseConversation, Conversation, InitialConvo, StepHandler } from './types';
 
 const isDev = process.env.NODE_ENV === 'development';
-type ConversationStep =
-  | 'welcome' // Step para escoger categoría
-  | 'category_selection' // Step genérico - escoger items de categoría -> first_level_selection
-  | 'item_selection' // Step genérico - escoger items de categoría -> second_level_selection
-  | 'quantity_selection'
-  | 'cart_actions'
-  | 'checkout'
-  | 'final';
-
-export interface ConversationConfig {
-  timeoutMinutes: number;
-}
-
-export interface BaseConversation {
-  phoneNumber: string;
-  step: ConversationStep;
-  lastInteraction: number;
-}
-
-export type StepHandler<T extends BaseConversation> = (
-  phone: string,
-  message: string,
-  conversation: T,
-) => Promise<string>;
-
-export interface Conversation<T extends BaseConversation> {
-  config: ConversationConfig;
-  stepHandlers: Record<string, StepHandler<T>>;
-}
 
 export function createConversationManager<T extends BaseConversation>(
   managerConfig: Conversation<T>,
@@ -37,12 +9,11 @@ export function createConversationManager<T extends BaseConversation>(
   const { config, stepHandlers } = managerConfig;
   const conversationTimeout = config.timeoutMinutes * 60; // Para KV (segundos)
   const conversationTimeoutMs = config.timeoutMinutes * 60 * 1000; // Para validación (milisegundos)
-  console.log('🚀 ~ conversationTimeout:', conversationTimeout);
 
   // Obtener o crear conversación
   const getOrCreateConversation = async (
     phoneNumber: string,
-    initialConversation: Omit<T, 'phoneNumber' | 'lastInteraction'>,
+    initialConversation: InitialConvo<T>,
   ): Promise<T> => {
     let conversation = await kv.get<T>(phoneNumber);
 
@@ -114,7 +85,7 @@ export function createConversationManager<T extends BaseConversation>(
   const processMessage = async (
     phoneNumber: string,
     message: string,
-    getInitialConversation: () => Omit<T, 'phoneNumber' | 'lastInteraction'>,
+    getInitialConversation: () => InitialConvo<T>,
     getWelcomeMessage: () => string,
   ): Promise<string> => {
     console.log('🚀 conversation processMessage:', { phoneNumber, message });
@@ -135,7 +106,7 @@ export function createConversationManager<T extends BaseConversation>(
     }
 
     // Llamamos siempre con los tres parámetros
-    return handler(phoneNumber, message, conversation);
+    return handler({ phoneNumber, message, conversation });
   };
 
   // Registrar nuevo step handler

@@ -1,67 +1,65 @@
-import {
-  CartItem,
-  handleCartActions,
-  handleCheckout,
-  handleQuantitySelection,
-} from '@/services/core/cart';
-import { BaseConversation, createConversationManager } from '@/services/core/conversation';
+import { handleCartActions, handleCheckout, handleQuantitySelection } from '@/services/core/cart';
+import { createConversationManager } from '@/services/core/conversation';
 import { handleCategorySelection, handleItemSelection } from '@/services/core/menu';
-import { createOrder, storeOrderInDB, TenantInfo } from '@/services/core/order';
+import { createOrder, storeOrderInDB } from '@/services/core/order';
+import type {
+  CartConversation,
+  CartItem,
+  GetWelcomeMessageFn,
+  InitialConvo,
+  StepProps,
+  TenantHandler,
+  TenantInfo,
+} from '@/services/core/types';
 import { Category, TENANT_CONFIG } from './config';
 
-export interface RestaurantConversation extends BaseConversation {
-  cart: CartItem[];
-  selectedCategory?: string;
-  selectedItem?: string;
-  selectedItemIndex?: number;
-}
-
-// Función para obtener conversación inicial del restaurante
-const getInitialRestaurantConversation = (): Omit<
-  RestaurantConversation,
-  'phoneNumber' | 'lastInteraction'
-> => ({
-  step: 'welcome',
-  cart: [],
+let categoriesListString = '';
+Object.keys(TENANT_CONFIG.categories).forEach((key, index) => {
+  const category = TENANT_CONFIG.categories[key];
+  categoriesListString += `${index + 1}️⃣ ${category.name.split(' ')[0]}\n`;
 });
 
-// Crear el manager del restaurante
-const restaurantManager = createConversationManager<RestaurantConversation>({
-  config: { timeoutMinutes: 7200 },
-  stepHandlers: {
-    welcome: handleWelcomeResponse,
-    category_selection: handleCategorySelectionResponse,
-    item_selection: handleItemSelectionResponse,
-    quantity_selection: handleQuantitySelectionResponse,
-    cart_actions: handleCartActionsResponse,
-    checkout: handleCheckoutResponse,
-  },
-});
-
-export type GetWelcomeMessageFn = (msgPreliminar?: string, greeting?: boolean) => string;
+// Función principal para ser usada en el webhook
+export const conversationHandler = async (phoneNumber: string, message: string) => {
+  try {
+    return await restaurantManager.processMessage(
+      phoneNumber,
+      message,
+      getInitialRestaurantConversation,
+      getWelcomeMessage,
+    );
+  } catch (error) {
+    console.error('❌ Error en conversationHandler:', error);
+    // Limpiar conversación corrupta y reiniciar
+    await restaurantManager.clearConversation(phoneNumber);
+    return getWelcomeMessage('❌ Ocurrió un error. Reiniciando...');
+  }
+};
 
 // Mensaje de bienvenida
-const getWelcomeMessage: GetWelcomeMessageFn = (msgPreliminar = '', greeting = true) => {
+const getWelcomeMessage: GetWelcomeMessageFn = (msgPreliminar = '') => {
   console.log('👋🏼 getWelcomeMessage');
-  const categories = Object.keys(TENANT_CONFIG.categories);
   let message = msgPreliminar ? `${msgPreliminar}\n\n` : '';
+  // prettier-ignore
+  message += '🍽️ Bienvenido a CheFoodie\'s, ¿qué deseas pedir?\n\n';
+  message += categoriesListString;
+  message += '\n*Elige un número*';
+  return message;
+};
 
-  if (greeting) {
-    // prettier-ignore
-    message += '🍽️ Bienvenido a CheFoodie\'s, ¿qué deseas pedir?\n\n';
-  }
-
-  categories.forEach((key, index) => {
-    const category = TENANT_CONFIG.categories[key];
-    message += `${index + 1}️⃣ ${category.name.split(' ')[0]}\n`;
-  });
-
+// Mensaje al seleccionar agregar más items
+const getAddMoreItemsMessage = () => {
+  console.log('👋🏼 getAddMoreItemsMessage');
+  let message = '¿Qué deseas añadir a tu pedido?\n\n';
+  message += categoriesListString;
   message += '\n*Elige un número*';
   return message;
 };
 
 // Manejar respuesta de bienvenida
-async function handleWelcomeResponse(phoneNumber: string): Promise<string> {
+async function handleWelcomeResponse({
+  phoneNumber,
+}: StepProps<CartConversation>): Promise<string> {
   await restaurantManager.updateConversation(phoneNumber, {
     step: 'category_selection',
   });
@@ -69,11 +67,8 @@ async function handleWelcomeResponse(phoneNumber: string): Promise<string> {
 }
 
 // Manejar respuesta de selección de categoria
-async function handleCategorySelectionResponse(
-  phoneNumber: string,
-  message: string,
-): Promise<string> {
-  console.log('🗃️ handleCategorySelectionResponse');
+const handleCategorySelectionResponse: TenantHandler = async ({ phoneNumber, message }) => {
+  console.log('🗃️ handleCategorySelectionResponse [category_selection]');
   return handleCategorySelection({
     message,
     categories: TENANT_CONFIG.categories,
@@ -84,14 +79,14 @@ async function handleCategorySelectionResponse(
         selectedCategory,
       }),
   });
-}
+};
 
-async function handleItemSelectionResponse(
-  phoneNumber: string,
-  message: string,
-  conversation: RestaurantConversation,
-): Promise<string> {
-  console.log('🪧 handleItemSelectionResponse');
+const handleItemSelectionResponse: TenantHandler = async ({
+  phoneNumber,
+  message,
+  conversation,
+}) => {
+  console.log('🪧 handleItemSelectionResponse [item_selection]');
   return handleItemSelection({
     message,
     category: TENANT_CONFIG.categories[conversation.selectedCategory!],
@@ -103,22 +98,19 @@ async function handleItemSelectionResponse(
         selectedItemIndex: opt - 1,
       }),
   });
-}
+};
 
-async function handleQuantitySelectionResponse(
-  phoneNumber: string,
-  message: string,
-): Promise<string> {
-  console.log('🧮 handleQuantitySelectionResponse');
-  const qtyConv = await restaurantManager.getOrCreateConversation(
+const handleQuantitySelectionResponse: TenantHandler = async ({ phoneNumber, message }) => {
+  console.log('🧮 handleQuantitySelectionResponse [quantity_selection]');
+  const conversation = await restaurantManager.getOrCreateConversation(
     phoneNumber,
     getInitialRestaurantConversation(),
   );
-  const cat = TENANT_CONFIG.categories[qtyConv.selectedCategory as Category];
-  const menuItem = cat.items[qtyConv.selectedItemIndex!];
+  const cat = TENANT_CONFIG.categories[conversation.selectedCategory as Category];
+  const menuItem = cat.items[conversation.selectedItemIndex!];
 
   return handleQuantitySelection({
-    conversation: qtyConv,
+    conversation,
     quantity: parseInt(message.trim(), 10),
     price: menuItem.price,
     deliveryCost: TENANT_CONFIG.deliveryCost,
@@ -128,42 +120,36 @@ async function handleQuantitySelectionResponse(
         cart: updatedCart,
       }),
   });
-}
+};
 
-async function handleCartActionsResponse(
-  phoneNumber: string,
-  message: string,
-  conversation: RestaurantConversation,
-): Promise<string> {
-  console.log('📮 handleCartActionsResponse');
+const handleCartActionsResponse: TenantHandler = async ({ phoneNumber, message, conversation }) => {
+  console.log('📮 handleCartActionsResponse [cart_actions] "TU CARRITO"');
   return handleCartActions({
     conversation,
     option: parseInt(message.trim(), 10),
     deliveryCost: TENANT_CONFIG.deliveryCost,
     transfersPhoneNumber: TENANT_CONFIG.transfersPhoneNumber,
-    updateConversationFn: (upd: Partial<RestaurantConversation>) =>
+    updateConversationFn: (upd: Partial<CartConversation>) =>
       restaurantManager.updateConversation(phoneNumber, upd),
     welcomeMessageFn: getWelcomeMessage,
+    addMoreItemsFn: getAddMoreItemsMessage,
   });
-}
+};
 
-async function handleCheckoutResponse(
-  phoneNumber: string,
-  message: string,
-  conversation: RestaurantConversation,
-): Promise<string> {
-  console.log('🛫 handleCheckoutResponse');
+const handleCheckoutResponse: TenantHandler = async ({ phoneNumber, message, conversation }) => {
+  console.log('🛫 handleCheckoutResponse [checkout] "CONFIRMACIÓN DE PEDIDO"');
   return handleCheckout({
     conversation,
     option: parseInt(message.trim(), 10),
     deliveryCost: TENANT_CONFIG.deliveryCost,
     transfersPhoneNumber: TENANT_CONFIG.transfersPhoneNumber,
-    updateConversationFn: (upd: Partial<RestaurantConversation>) =>
+    updateConversationFn: (upd: Partial<CartConversation>) =>
       restaurantManager.updateConversation(phoneNumber, upd),
     welcomeMessageFn: getWelcomeMessage,
+    addMoreItemsFn: getAddMoreItemsMessage,
     finalMessageFn: () => getFinalMessage(phoneNumber, conversation.cart),
   });
-}
+};
 
 // Mensaje final
 const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Promise<string> => {
@@ -202,26 +188,25 @@ const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Promise<s
   return message;
 };
 
-// Función principal para ser usada en el webhook
-export const conversationHandler = async (
-  phoneNumber: string,
-  message: string,
-): Promise<string> => {
-  try {
-    return await restaurantManager.processMessage(
-      phoneNumber,
-      message,
-      getInitialRestaurantConversation,
-      getWelcomeMessage,
-    );
-  } catch (error) {
-    console.error('❌ Error en conversationHandler:', error);
-    // Limpiar conversación corrupta y reiniciar
-    await restaurantManager.clearConversation(phoneNumber);
-    return getWelcomeMessage('❌ Ocurrió un error. Reiniciando...');
-  }
-};
-
 // Funciones útiles para UI Test
 export const UIClearConversation = (phone: string) => restaurantManager.clearConversation(phone);
 export const hasActiveConvo = (phone: string) => restaurantManager.hasActiveConversation(phone);
+
+// Función para obtener conversación inicial del restaurante
+const getInitialRestaurantConversation = (): InitialConvo<CartConversation> => ({
+  step: 'welcome',
+  cart: [],
+});
+
+// Crear el manager del restaurante
+const restaurantManager = createConversationManager<CartConversation>({
+  config: { timeoutMinutes: 15 },
+  stepHandlers: {
+    welcome: handleWelcomeResponse,
+    category_selection: handleCategorySelectionResponse,
+    item_selection: handleItemSelectionResponse,
+    quantity_selection: handleQuantitySelectionResponse,
+    cart_actions: handleCartActionsResponse,
+    checkout: handleCheckoutResponse,
+  },
+});

@@ -1,52 +1,31 @@
-import { GetWelcomeMessageFn } from '../tenants/cheefoodies/conversation-handler';
 import { formatPrice } from '../utils';
-import { BaseConversation } from './conversation';
-
-export interface CartItem {
-  name: string;
-  quantity: number;
-  price: number;
-  category: string;
-  itemIndex: number;
-}
-
-// Extender BaseConversation para incluir los campos específicos del carrito
-export interface CartConversation extends BaseConversation {
-  cart: CartItem[];
-  selectedCategory?: string;
-  selectedItem?: string;
-  selectedItemIndex?: number;
-}
+import {
+  CartActionsFn,
+  CartItem,
+  CheckoutFn,
+  CheckoutMessageFn,
+  QuantitySelectionFn,
+} from './types';
 
 export function calculateCartTotal(cart: CartItem[]): number {
   return cart.reduce((total, item) => total + item.price * item.quantity, 0);
 }
 
 export function calculateDeliveryTotal(cart: CartItem[], deliveryCost: number): number {
-  if (!deliveryCost) {
-    return 0;
-  }
+  if (!deliveryCost) return 0;
 
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
   return deliveryCost * totalItems;
 }
 
-interface HandleQuantitySelectionProps {
-  conversation: CartConversation;
-  quantity: number;
-  price: number;
-  deliveryCost: number;
-  updateConversationFn: (updatedCart: CartItem[]) => Promise<void>;
-}
-
 // Manejar selección de cantidad
-export async function handleQuantitySelection({
+export const handleQuantitySelection: QuantitySelectionFn = async ({
   conversation,
   quantity,
   price,
   deliveryCost,
   updateConversationFn,
-}: HandleQuantitySelectionProps): Promise<string> {
+}) => {
   if (
     quantity >= 1 &&
     quantity <= 10 &&
@@ -69,7 +48,7 @@ export async function handleQuantitySelection({
   }
 
   return '❌ Cantidad no válida. Por favor ingresa un número entre 1 y 10.';
-}
+};
 
 // Mensaje de acciones del carrito
 function getCartActionsMessage(cart: CartItem[], deliveryCost: number): string {
@@ -100,33 +79,22 @@ function getCartActionsMessage(cart: CartItem[], deliveryCost: number): string {
   return message;
 }
 
-interface HandleCartActionsProps {
-  conversation: CartConversation;
-  option: number;
-  deliveryCost: number;
-  transfersPhoneNumber: string;
-  updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
-  welcomeMessageFn: GetWelcomeMessageFn;
-  // TODO: Crear otra Fn "addMoreItemsFn"
-  // para gestionar arriba (convo-handler) el texto '¿Qué más deseas pedir'
-  // y llamar el handleWelcomeResponse que es quien actualiza el step a category_selection
-}
-
-// Manejar acciones del carrito
-export async function handleCartActions({
+// Manejar acciones del carrito [cart_actions]
+export const handleCartActions: CartActionsFn = async ({
   conversation,
   option,
   deliveryCost,
   transfersPhoneNumber,
   updateConversationFn,
   welcomeMessageFn,
-}: HandleCartActionsProps): Promise<string> {
+  addMoreItemsFn,
+}) => {
+  // Titulo: "TU CARRITO"
   switch (option) {
     case 1:
       // Agregar más productos
-      // TODO: Fix this
-      await updateConversationFn({ step: 'welcome' });
-      return welcomeMessageFn('¿Qué más deseas pedir?', false);
+      await updateConversationFn({ step: 'category_selection' });
+      return addMoreItemsFn();
 
     case 2:
       // Proceder al checkout
@@ -143,28 +111,16 @@ export async function handleCartActions({
 
     case 3:
       // Vaciar carrito
-      // TODO: Borrar selectedCategory, selectedItem & selectedItemIndex
-      // Unir con el case 3 del checkout?
-      await updateConversationFn({ cart: [], step: 'welcome' });
+      await updateConversationFn({ cart: [], step: 'category_selection' });
       return welcomeMessageFn('🗑️ Carrito vaciado!');
 
     default:
       return `❌ Opción no válida.\n\n${getCartActionsMessage(conversation.cart, deliveryCost)}`;
   }
-}
-
-interface GetCheckoutMessageProps {
-  cart: CartItem[];
-  deliveryCost: number;
-  transfersPhoneNumber: string;
-}
+};
 
 // Mensaje de checkout
-function getCheckoutMessage({
-  cart,
-  deliveryCost,
-  transfersPhoneNumber,
-}: GetCheckoutMessageProps): string {
+const getCheckoutMessage: CheckoutMessageFn = ({ cart, deliveryCost, transfersPhoneNumber }) => {
   let message = '📋 *CONFIRMACIÓN DE PEDIDO*\n\n';
 
   cart.forEach((item) => {
@@ -187,50 +143,40 @@ function getCheckoutMessage({
 
   message += 'Responde con:\n';
   message += '1️⃣ Confirmar transferencia realizada\n';
-  message += '2️⃣ Modificar carrito\n';
+  message += '2️⃣ Agregar más productos\n';
   message += '3️⃣ Cancelar pedido\n\n';
 
   message += '*Elige un número*';
 
   return message;
-}
+};
 
-interface HandleCheckoutProps {
-  conversation: CartConversation;
-  option: number;
-  deliveryCost: number;
-  transfersPhoneNumber: string;
-  updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
-  welcomeMessageFn: GetWelcomeMessageFn;
-  finalMessageFn: () => Promise<string>;
-}
-
-// Manejar checkout
-export async function handleCheckout({
+// Manejar seleccion hecha en checkout
+export const handleCheckout: CheckoutFn = async ({
   conversation,
   option,
   deliveryCost,
   transfersPhoneNumber,
   updateConversationFn,
   welcomeMessageFn,
+  addMoreItemsFn,
   finalMessageFn,
-}: HandleCheckoutProps): Promise<string> {
+}) => {
+  // Titulo: "CONFIRMACIÓN DE PEDIDO"
   switch (option) {
     case 1:
-      // Confirmar pedido
+      // Confirmar pago
       await updateConversationFn({ step: 'final' });
       return await finalMessageFn();
 
     case 2:
-      // Modificar carrito
-      // TODO: Fix this
-      await updateConversationFn({ step: 'cart_actions' });
-      return getCartActionsMessage(conversation.cart, deliveryCost);
+      // Agregar más productos
+      await updateConversationFn({ step: 'category_selection' });
+      return addMoreItemsFn();
 
     case 3:
       // Cancelar pedido
-      // TODO: Borrar selectedCategory, selectedItem & selectedItemIndex
-      await updateConversationFn({ cart: [], step: 'welcome' });
+      await updateConversationFn({ cart: [], step: 'category_selection' });
       return welcomeMessageFn('❌ Pedido cancelado!');
 
     default:
@@ -240,4 +186,4 @@ export async function handleCheckout({
         transfersPhoneNumber,
       })}`;
   }
-}
+};

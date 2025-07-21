@@ -1,10 +1,4 @@
-import { MenuCategory } from '@/services/core/menu';
-
-interface TenantConfig {
-  transfersPhoneNumber: string;
-  deliveryCost: number;
-  categories: Record<string, MenuCategory>;
-}
+import type { TenantConfig } from '@/services/core/types';
 
 // TODO: Cargar esto desde un Gist
 // Configuración del menú - Fuente única de verdad
@@ -28,7 +22,7 @@ export const TENANT_CONFIG: TenantConfig = {
     almuerzos: {
       name: 'ALMUERZOS DISPONIBLES',
       emoji: '🍽️',
-      includes: 'arroz, aguacate, ensalada, jugo y principio',
+      footerInfo: '*Todos incluyen:* arroz, aguacate, ensalada, jugo y principio',
       items: [
         { name: 'Almuerzo del día (consulta nuestra imagen de perfil)', price: 18000 },
         { name: 'Ejecutivo con Churrasco', price: 20500 },
