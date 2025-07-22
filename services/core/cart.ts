@@ -1,11 +1,11 @@
-import { formatPrice } from '../utils';
 import {
   CartActionsFn,
   CartItem,
   CheckoutFn,
   CheckoutMessageFn,
   QuantitySelectionFn,
-} from './types';
+} from '@/types/conversation';
+import { formatPrice } from '@/utils/formatters';
 
 export function calculateCartTotal(cart: CartItem[]): number {
   return cart.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -167,7 +167,7 @@ export const handleCheckout: CheckoutFn = async ({
     case 1:
       // Confirmar pago
       await updateConversationFn({ step: 'final' });
-      return await finalMessageFn();
+      return finalMessageFn();
 
     case 2:
       // Agregar más productos

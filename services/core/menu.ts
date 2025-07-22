@@ -1,5 +1,9 @@
-import { formatPrice } from '../utils';
-import type { CategorySelectionPropsFn, ItemSelectionPropsFn, MenuCategory } from './types';
+import type {
+  CategorySelectionPropsFn,
+  ItemSelectionPropsFn,
+  MenuCategory,
+} from '@/types/conversation';
+import { formatPrice } from '@/utils/formatters';
 
 // Manejar respuesta de selección de categoria
 export const handleCategorySelection: CategorySelectionPropsFn = async ({

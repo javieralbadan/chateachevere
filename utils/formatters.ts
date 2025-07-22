@@ -8,11 +8,6 @@ const DEFAULT = {
   CURRENCY: 'COP',
 };
 
-interface CurrencyProps {
-  value: number;
-  options?: Intl.NumberFormatOptions;
-}
-
 export const formatTime = ({ dateTime: time }: { dateTime: DateTime }): string => {
   const formattedTime = time.toFormat('h:mm a'); // Formato 12 horas (10:30 a. m. | 7:30 p. m.)
   const finalTime = formattedTime.replace(/\.\s?/g, '').replace(/\s/g, ' ');
@@ -58,12 +53,12 @@ const DEFAULT_CURRENCY_OPTIONS: Intl.NumberFormatOptions = {
   maximumSignificantDigits: 3,
 };
 
-export const formatCurrency = ({ value, options = DEFAULT_CURRENCY_OPTIONS }: CurrencyProps) => {
+export const formatPrice = (value: number) => {
   if (!value) {
     return '';
   }
 
-  const formatter = new Intl.NumberFormat(DEFAULT.LANGUAGE, options);
+  const formatter = new Intl.NumberFormat(DEFAULT.LANGUAGE, DEFAULT_CURRENCY_OPTIONS);
   return formatter.format(value);
 };
 

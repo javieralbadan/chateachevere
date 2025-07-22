@@ -1,9 +1,9 @@
-import { db, Timestamp } from '@/utils/firebase';
-import { formatPrice, isTestingOrder } from '../utils';
+import type { CreateOrderProps, OrderData } from '@/types/conversation';
+import { formatPrice } from '@/utils/formatters';
+import { db, Timestamp } from '@/utils/server/firebase';
+import { isTestingOrder } from '@/utils/tenantUtils';
 import { calculateCartTotal, calculateDeliveryTotal } from './cart';
-import type { CreateOrderProps, OrderData } from './types';
 
-// Crear objeto order
 export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps): OrderData => {
   try {
     const subtotal = calculateCartTotal(cart);
@@ -32,9 +32,8 @@ export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps)
   }
 };
 
-// Guardar pedido en Firestore
 export const storeOrderInDB = async (orderData: OrderData): Promise<string> => {
-  console.log('📝 Creando orden en Firestore:', orderData);
+  console.log('📝 Guardando pedido en Firestore:', orderData);
   try {
     const docRef = await db.collection('orders').add(orderData);
 

@@ -1,5 +1,10 @@
+import type {
+  BaseConversation,
+  Conversation,
+  InitialConvo,
+  StepHandler,
+} from '@/types/conversation';
 import { kv } from '@vercel/kv';
-import type { BaseConversation, Conversation, InitialConvo, StepHandler } from './types';
 
 const isDev = process.env.NODE_ENV === 'development';
 

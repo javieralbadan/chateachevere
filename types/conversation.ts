@@ -1,4 +1,4 @@
-import { Timestamp } from '@/utils/firebase';
+import { Timestamp } from '@/utils/server/firebase';
 
 // ***************
 // CONVERSATION
@@ -41,6 +41,24 @@ export type InitialConvo<T> = Omit<T, 'phoneNumber' | 'lastInteraction'>;
 // ***************
 // MENU
 // ***************
+
+interface SpanishItem {
+  nombre: string;
+  precio: number;
+}
+
+interface SpanishCategory {
+  nombre: string;
+  emoji: string;
+  infoAdicional?: string;
+  items: SpanishItem[];
+}
+
+export interface SpanishConfiguration {
+  numeroTransferencias: string;
+  costoDomicilio: number;
+  categorias: Record<string, SpanishCategory>;
+}
 
 export interface MenuItem {
   name: string;
