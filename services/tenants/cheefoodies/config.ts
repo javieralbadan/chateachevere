@@ -1,40 +1,44 @@
-import type { TenantConfig } from '@/services/core/types';
+import type { SpanishConfiguration, TenantConfig } from '@/types/conversation';
+import { getTenantConfig } from '@/utils/tenantUtils';
 
 // Configuración del menú - Fuente única de verdad
-export const TENANT_CONFIG: TenantConfig = {
-  transfersPhoneNumber: '573112112565', // Número en formato: código país + número
-  deliveryCost: 2000, // En pesos, $2.000 por domicilio
-  categories: {
+export const fallbackData: SpanishConfiguration = {
+  numeroTransferencias: '573112112565', // Número en formato: código país + número
+  costoDomicilio: 2000, // En pesos, $2.000 por domicilio
+  categorias: {
     desayunos: {
-      name: 'DESAYUNOS DISPONIBLES',
+      nombre: 'DESAYUNOS DISPONIBLES',
       emoji: '🌅',
       items: [
-        { name: 'Desayuno bogotano', price: 15000 },
-        { name: 'Desayuno ranchero', price: 16000 },
-        { name: 'Desayuno tolimense con tamal', price: 18000 },
-        { name: 'Desayuno llanero', price: 17000 },
-        { name: 'Desayuno costeño', price: 16500 },
-        { name: 'Desayuno con caldo', price: 14500 },
-        { name: 'Regional con calentao', price: 15500 },
+        { nombre: 'Desayuno bogotano', precio: 15000 },
+        { nombre: 'Desayuno ranchero', precio: 16000 },
+        { nombre: 'Desayuno tolimense con tamal', precio: 18000 },
+        { nombre: 'Desayuno llanero', precio: 17000 },
+        { nombre: 'Desayuno costeño', precio: 16500 },
+        { nombre: 'Desayuno con caldo', precio: 14500 },
+        { nombre: 'Regional con calentao', precio: 15500 },
       ],
     },
     almuerzos: {
-      name: 'ALMUERZOS DISPONIBLES',
+      nombre: 'ALMUERZOS DISPONIBLES',
       emoji: '🍽️',
-      footerInfo: '*Todos incluyen:* arroz, aguacate, ensalada, jugo y principio',
+      infoAdicional: '*Todos incluyen:* arroz, aguacate, ensalada, jugo y principio',
       items: [
-        { name: 'Almuerzo del día (consulta nuestra imagen de perfil)', price: 18000 },
-        { name: 'Ejecutivo con Churrasco', price: 20500 },
-        { name: 'Ejecutivo con Pescado sudado', price: 20500 },
-        { name: 'Ejecutivo con Pollo especial', price: 20500 },
-        { name: 'Ejecutivo con Callo marinera', price: 20500 },
-        { name: 'Ejecutivo con Sudado carne yuca', price: 20500 },
-        { name: 'Ejecutivo con Pollo sudado yuca', price: 20500 },
-        { name: 'Ejecutivo con Mojarra frita', price: 20500 },
-        { name: 'Ejecutivo con Carne asada', price: 20500 },
+        { nombre: 'Almuerzo del día (consulta nuestra imagen de perfil)', precio: 18000 },
+        { nombre: 'Ejecutivo con Churrasco', precio: 20500 },
+        { nombre: 'Ejecutivo con Pescado sudado', precio: 20500 },
+        { nombre: 'Ejecutivo con Pollo especial', precio: 20500 },
+        { nombre: 'Ejecutivo con Callo marinera', precio: 20500 },
+        { nombre: 'Ejecutivo con Sudado carne yuca', precio: 20500 },
+        { nombre: 'Ejecutivo con Pollo sudado yuca', precio: 20500 },
+        { nombre: 'Ejecutivo con Mojarra frita', precio: 20500 },
+        { nombre: 'Ejecutivo con Carne asada', precio: 20500 },
       ],
     },
   },
 };
+
+// Intentar fetch de configuraciones desde Gist y mapear a inglés
+export const TENANT_CONFIG: TenantConfig = await getTenantConfig(fallbackData);
 
 export type Category = keyof typeof TENANT_CONFIG.categories;
