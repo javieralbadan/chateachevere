@@ -1,7 +1,5 @@
-import {
-  conversationHandler,
-  hasActiveConvo,
-} from '@/services/tenants/cheefoodies/conversation-handler';
+import * as carneBrava from '@/services/tenants/carne-brava/conversation-handler';
+import * as cheefoodies from '@/services/tenants/cheefoodies/conversation-handler';
 import {
   WhatsAppTemplateMessage,
   WhatsAppTemplateRequest,
@@ -119,17 +117,23 @@ export async function getResponseMessage(
 
   const lowerMessage = incomingMessage.toLowerCase();
   try {
-    // Verificar si es una conversación de restaurante (nueva o existente)
-    const isRestaurantActive = await hasActiveConvo(phoneNumber);
-    if (isRestaurantActive || lowerMessage.includes('restaurante')) {
-      console.log('🍽️ Procesando como conversación de restaurante');
-      return await conversationHandler(phoneNumber, incomingMessage);
+    // TODO: Check this behavior in prod
+    if (lowerMessage.includes('reiniciar')) {
+      await carneBrava.clearConvo(phoneNumber);
+      await cheefoodies.clearConvo(phoneNumber);
     }
 
-    // Verificar si es una conversación de pizzeria (nueva o existente)
-    if (lowerMessage.includes('pizzeria')) {
-      console.log('🍕 Procesando como mensaje de pizzeria');
-      return processPizzeriaAutoReply();
+    // Direccionar conversación (nueva o existente) con su respectivo tenant handler
+    const isRestaurantActive = await cheefoodies.hasActiveConvo(phoneNumber);
+    if (isRestaurantActive || lowerMessage.includes('restaurante')) {
+      console.log('🍽️ Procesando como conversación de restaurante');
+      return await cheefoodies.conversationHandler(phoneNumber, incomingMessage);
+    }
+
+    const isCarneBravaActive = await carneBrava.hasActiveConvo(phoneNumber);
+    if (isCarneBravaActive || lowerMessage.includes('brava')) {
+      console.log('🍽️ Procesando como conversación de Carne Brava');
+      return await carneBrava.conversationHandler(phoneNumber, incomingMessage);
     }
 
     // Si no es ninguno, devolver el mensaje de bienvenida
@@ -138,8 +142,4 @@ export async function getResponseMessage(
     console.error('❌ Error en getResponseMessage:', error);
     return 'Lo siento, ocurrió un error. Intenta nuevamente.';
   }
-}
-
-export function processPizzeriaAutoReply(): string {
-  return '🍕 Bienvenido a Richezza 🍕\n\n¿qué pizza deseas pedir para hoy?';
 }

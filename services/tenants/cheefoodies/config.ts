@@ -40,5 +40,6 @@ export const fallbackData: SpanishConfiguration = {
 
 // Intentar fetch de configuraciones desde Gist y mapear a inglés
 export const TENANT_CONFIG: TenantConfig = await getTenantConfig(fallbackData);
+export const TENANT_ID = 'cheefoodies';
 
 export type Category = keyof typeof TENANT_CONFIG.categories;

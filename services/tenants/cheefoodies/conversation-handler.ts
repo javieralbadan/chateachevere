@@ -2,17 +2,19 @@ import { handleCartActions, handleCheckout, handleQuantitySelection } from '@/se
 import { createConversationManager } from '@/services/core/conversation';
 import { handleCategorySelection, handleItemSelection } from '@/services/core/menu';
 import type { CartConversation, CartItem, InitialConvo, TenantHandler } from '@/types/conversation';
-import { Category, TENANT_CONFIG } from './config';
+import { Category, TENANT_CONFIG, TENANT_ID } from './config';
 import { getAddMoreItemsMessage, getFinalMessage, getWelcomeMessage } from './custom-messages';
 
 export const hasActiveConvo = (phone: string) => restaurantManager.hasActiveConversation(phone);
+export const clearConvo = (phone: string) => restaurantManager.clearConversation(phone);
+
 // Función principal para ser usada en el webhook
 export const conversationHandler = async (phoneNumber: string, message: string) => {
   try {
     return await restaurantManager.processMessage(
       phoneNumber,
       message,
-      getInitialRestaurantConversation,
+      getInitialConversation,
       getWelcomeMessage,
     );
   } catch (error) {
@@ -22,8 +24,8 @@ export const conversationHandler = async (phoneNumber: string, message: string) 
     return getWelcomeMessage('❌ Ocurrió un error. Reiniciando...');
   }
 };
-// Función para obtener conversación inicial del restaurante
-const getInitialRestaurantConversation = (): InitialConvo<CartConversation> => ({
+// Función para obtener conversación inicial del tenant
+const getInitialConversation = (): InitialConvo<CartConversation> => ({
   step: 'welcome',
   cart: [],
 });
@@ -72,7 +74,7 @@ const handleQuantitySelectionResponse: TenantHandler = async ({ phoneNumber, mes
   console.log('🧮 handleQuantitySelectionResponse [quantity_selection]');
   const conversation = await restaurantManager.getOrCreateConversation(
     phoneNumber,
-    getInitialRestaurantConversation(),
+    getInitialConversation(),
   );
   const cat = TENANT_CONFIG.categories[conversation.selectedCategory as Category];
   const menuItem = cat.items[conversation.selectedItemIndex!];
@@ -125,9 +127,12 @@ const handleFinishConvo = async (phoneNumber: string, cart: CartItem[]): Promise
   return finalMessage;
 };
 
-// Crear el manager del restaurante
+// Crear el manager del tenant
 const restaurantManager = createConversationManager<CartConversation>({
-  config: { timeoutMinutes: 15 },
+  config: {
+    tenantId: TENANT_ID,
+    timeoutMinutes: 15,
+  },
   stepHandlers: {
     welcome: handleWelcomeResponse,
     category_selection: handleCategorySelectionResponse,

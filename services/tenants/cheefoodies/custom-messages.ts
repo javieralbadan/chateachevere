@@ -1,7 +1,7 @@
 import { createOrder, storeOrderInDB } from '@/services/core/order';
 import type { CartItem, GetWelcomeMessageFn, TenantInfo } from '@/types/conversation';
 import { formatPrice } from '@/utils/formatters';
-import { TENANT_CONFIG } from './config';
+import { TENANT_CONFIG, TENANT_ID } from './config';
 
 let categoriesListString = '';
 Object.keys(TENANT_CONFIG.categories).forEach((key, index) => {
@@ -33,7 +33,7 @@ export const getAddMoreItemsMessage = () => {
 export const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Promise<string> => {
   console.log('🏁 getFinalMessage');
   const tenantInfo: TenantInfo = {
-    name: 'cheefoodies',
+    name: TENANT_ID,
     transfersPhoneNumber: TENANT_CONFIG.transfersPhoneNumber,
     deliveryCost: TENANT_CONFIG.deliveryCost,
   };

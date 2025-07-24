@@ -4,6 +4,11 @@ import { Timestamp } from '@/utils/server/firebase';
 // CONVERSATION
 // ***************
 
+export interface CacheEntry<T> {
+  data: T;
+  expires: number;
+}
+
 type ConversationStep =
   | 'welcome' // Step para escoger categoría
   | 'category_selection' // Step genérico - escoger items de categoría -> first_level_selection
@@ -14,11 +19,12 @@ type ConversationStep =
   | 'final';
 
 export interface ConversationConfig {
+  tenantId: string;
   timeoutMinutes: number;
 }
 
 export interface BaseConversation {
-  phoneNumber: string;
+  key: string;
   step: ConversationStep;
   lastInteraction: number;
 }
@@ -36,7 +42,7 @@ export interface Conversation<T extends BaseConversation> {
   stepHandlers: Record<string, StepHandler<T>>;
 }
 
-export type InitialConvo<T> = Omit<T, 'phoneNumber' | 'lastInteraction'>;
+export type InitialConvo<T> = Omit<T, 'key' | 'lastInteraction'>;
 
 // ***************
 // MENU
