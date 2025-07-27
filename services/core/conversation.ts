@@ -7,7 +7,7 @@ import type {
 } from '@/types/conversation';
 import { kv } from '@vercel/kv';
 
-const logModule = process.env.LOG_CORE_CONVO || false;
+const logModule = process.env.LOG_CORE_CONVO === 'true';
 const localCache = new Map<string, CacheEntry<BaseConversation>>();
 
 export function createConversationManager<T extends BaseConversation>(

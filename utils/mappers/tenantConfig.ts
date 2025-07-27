@@ -1,7 +1,11 @@
 import { CategoriesFlowConfig, Category, SequentialFlowConfig, TenantConfig } from '@/types/menu';
-import { SpanishCategoriesFlowConfig, SpanishSequentialFlowConfig, SpanishTenantConfig } from '@/types/menu-spanish';
+import {
+  SpanishCategoriesFlowConfig,
+  SpanishSequentialFlowConfig,
+  SpanishTenantConfig,
+} from '@/types/menu-spanish';
 
-const logModule = process.env.LOG_TENANT_MAPPER || false;
+const logModule = process.env.LOG_TENANT_MAPPER === 'true';
 
 // Función para transformar configuración española a inglés
 export function mapConfigSpanishToEnglish(spanishConfig: SpanishTenantConfig): TenantConfig {
@@ -15,7 +19,7 @@ export function mapConfigSpanishToEnglish(spanishConfig: SpanishTenantConfig): T
 }
 
 // Type guard para config del flujo secuencial en español, implementación similar a isSequentialFlow
-function isSpanishSequentialFlow (config: SpanishTenantConfig) {
+function isSpanishSequentialFlow(config: SpanishTenantConfig) {
   if (!(config as SpanishSequentialFlowConfig).etapas) {
     return false;
   }

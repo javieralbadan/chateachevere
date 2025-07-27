@@ -4,7 +4,7 @@ import { db, Timestamp } from '@/utils/server/firebase';
 import { isTestingOrder } from '@/utils/tenantUtils';
 import { calculateCartTotal, calculateDeliveryTotal } from './cart';
 
-const logModule = process.env.LOG_CORE_ORDER || false;
+const logModule = process.env.LOG_CORE_ORDER === 'true';
 
 export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps): OrderData => {
   if (logModule) console.log('📝 Creando orden:', tenantInfo, phoneNumber, cart);

@@ -77,3 +77,11 @@ export const formatPhoneNumber = (phone: string): string => {
     return cleanPhone;
   }
 };
+
+export const numberToEmoji = (number: number) => {
+  return number
+    .toString()
+    .split('')
+    .map((digit) => `${digit}️⃣`)
+    .join('');
+};

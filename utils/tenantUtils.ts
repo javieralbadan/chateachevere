@@ -8,7 +8,7 @@ import { mapConfigSpanishToEnglish } from '@/utils/mappers/tenantConfig';
 import { DateTime } from 'luxon';
 
 const isDev = process.env.NODE_ENV === 'development';
-const logModule = process.env.LOG_TENANT_UTILS || false;
+const logModule = process.env.LOG_TENANT_UTILS === 'true';
 
 export function isTestingOrder(tenantName: string): boolean {
   const tenantsTesters = ['cheefoodies'];

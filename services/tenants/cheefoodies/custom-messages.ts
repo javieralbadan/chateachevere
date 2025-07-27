@@ -1,12 +1,12 @@
 import { createOrder, storeOrderInDB } from '@/services/core/order';
 import type { CartItem, GetWelcomeMessageFn, TenantInfo } from '@/types/conversation';
-import { formatPrice } from '@/utils/formatters';
-import { TENANT_CONFIG, TENANT_ID } from './config';
+import { formatPrice, numberToEmoji } from '@/utils/formatters';
+import { TENANT_CONFIG, TENANT_ID, tenantCategories } from './config';
 
 let categoriesListString = '';
-Object.keys(TENANT_CONFIG.categories).forEach((key, index) => {
-  const category = TENANT_CONFIG.categories[key];
-  categoriesListString += `${index + 1}️⃣ ${category.name.split(' ')[0]}\n`;
+Object.keys(tenantCategories).forEach((key, index) => {
+  const category = tenantCategories[key];
+  categoriesListString += `${numberToEmoji(index + 1)} ${category.name.split(' ')[0]}\n`;
 });
 
 // Mensaje de bienvenida

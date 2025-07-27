@@ -1,8 +1,8 @@
 import type { CategorySelectionPropsFn, ItemSelectionPropsFn } from '@/types/conversation';
 import { Category } from '@/types/menu';
-import { formatPrice } from '@/utils/formatters';
+import { formatPrice, numberToEmoji } from '@/utils/formatters';
 
-const logModule = process.env.LOG_CORE_MENU || false;
+const logModule = process.env.LOG_CORE_MENU === 'true';
 
 // Manejar respuesta de selección de categoria
 export const handleCategorySelection: CategorySelectionPropsFn = async ({
@@ -46,7 +46,12 @@ export const handleItemSelection: ItemSelectionPropsFn = async ({
     await updateConversationFn(option, selectedItem);
     const itemPrice = formatPrice(selectedItem.price);
 
-    return `📦 *${selectedItem.name}*\n\nPrecio: ${itemPrice}\n\n¿Cuántas unidades deseas?\n\n*Responde con un número (1-10)*`;
+    let message = `📦 *${selectedItem.name}*\n`;
+    if (selectedItem.description) message += `${selectedItem.description}\n`;
+    message += `Precio: ${itemPrice}\n\n`;
+    message += '¿Cuántas unidades deseas?\n\n*Responde con un número (1-10)*';
+
+    return message;
   }
 
   return `❌ Opción no válida.\n\n${getItemsSelectionMessage(category)}`;
@@ -57,7 +62,7 @@ function getItemsSelectionMessage({ emoji, name, items, footerInfo }: Category):
   let message = `${emoji} *${name}*\n\n`;
 
   items.forEach((item, index) => {
-    message += `${index + 1}️⃣ ${item.name} - ${formatPrice(item.price)}\n`;
+    message += `${numberToEmoji(index + 1)} ${item.name} - ${formatPrice(item.price)}\n`;
   });
 
   if (footerInfo) message += `\n${footerInfo}\n`;
