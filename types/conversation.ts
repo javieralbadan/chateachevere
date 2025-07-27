@@ -1,4 +1,5 @@
 import { Timestamp } from '@/utils/server/firebase';
+import { Category, MenuItem } from './menu';
 
 // ***************
 // CONVERSATION
@@ -48,40 +49,9 @@ export type InitialConvo<T> = Omit<T, 'key' | 'lastInteraction'>;
 // MENU
 // ***************
 
-interface SpanishItem {
-  nombre: string;
-  precio: number;
-}
-
-interface SpanishCategory {
-  nombre: string;
-  emoji: string;
-  infoAdicional?: string;
-  items: SpanishItem[];
-}
-
-export interface SpanishConfiguration {
-  numeroTransferencias: string;
-  costoDomicilio: number;
-  categorias: Record<string, SpanishCategory>;
-}
-
-export interface MenuItem {
-  name: string;
-  price: number;
-  description?: string;
-}
-
-export interface MenuCategory {
-  name: string;
-  emoji: string;
-  items: MenuItem[];
-  footerInfo?: string;
-}
-
 interface CategorySelectionProps {
   message: string;
-  categories: Record<string, MenuCategory>;
+  categories: Record<string, Category>;
   welcomeMessageFn: GetWelcomeMessageFn;
   updateConversationFn: (selectedCategoryKey: string) => Promise<void>;
 }
@@ -90,7 +60,7 @@ export type CategorySelectionPropsFn = (Props: CategorySelectionProps) => Promis
 
 interface ItemSelectionProps {
   message: string;
-  category: MenuCategory;
+  category: Category;
   welcomeMessageFn: GetWelcomeMessageFn;
   updateConversationFn: (option: number, selectedItem: MenuItem) => Promise<void>;
 }
@@ -195,12 +165,6 @@ export interface OrderData {
 // ***************
 // HANDLERS
 // ***************
-
-export interface TenantConfig {
-  transfersPhoneNumber: string;
-  deliveryCost: number;
-  categories: Record<string, MenuCategory>;
-}
 
 export type TenantHandler = StepHandler<CartConversation>;
 

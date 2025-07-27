@@ -1,9 +1,8 @@
-import type {
-  CategorySelectionPropsFn,
-  ItemSelectionPropsFn,
-  MenuCategory,
-} from '@/types/conversation';
+import type { CategorySelectionPropsFn, ItemSelectionPropsFn } from '@/types/conversation';
+import { Category } from '@/types/menu';
 import { formatPrice } from '@/utils/formatters';
+
+const logModule = process.env.LOG_CORE_MENU || false;
 
 // Manejar respuesta de selección de categoria
 export const handleCategorySelection: CategorySelectionPropsFn = async ({
@@ -12,9 +11,9 @@ export const handleCategorySelection: CategorySelectionPropsFn = async ({
   welcomeMessageFn,
   updateConversationFn,
 }) => {
-  console.log('🗃️ handleCategorySelection', message, categories);
   if (!Object.keys(categories).length) return welcomeMessageFn();
 
+  if (logModule) console.log('🗃️ handleCategorySelection', message, categories);
   const option = parseInt(message.trim());
   const categoriesKeys = Object.keys(categories); // Ej: ['desayunos', 'almuerzos']
 
@@ -22,7 +21,7 @@ export const handleCategorySelection: CategorySelectionPropsFn = async ({
     const selectedCategoryKey: string = categoriesKeys[option - 1];
     await updateConversationFn(selectedCategoryKey);
     const selectedCategory = categories[selectedCategoryKey];
-    console.log('🚀 ~ selectedCategoryKey:', selectedCategoryKey);
+    if (logModule) console.log('🚀 ~ selectedCategoryKey:', selectedCategoryKey);
 
     return getItemsSelectionMessage(selectedCategory);
   }
@@ -37,9 +36,9 @@ export const handleItemSelection: ItemSelectionPropsFn = async ({
   welcomeMessageFn,
   updateConversationFn,
 }) => {
-  console.log('⛏️ handleItemSelection:', message, category);
   if (!category && welcomeMessageFn()) return welcomeMessageFn();
 
+  if (logModule) console.log('⛏️ handleItemSelection:', message, category);
   const option = parseInt(message.trim());
 
   if (option >= 1 && option <= category.items.length) {
@@ -54,7 +53,7 @@ export const handleItemSelection: ItemSelectionPropsFn = async ({
 };
 
 // Generar mensaje de opciones dinámicamente
-function getItemsSelectionMessage({ emoji, name, items, footerInfo }: MenuCategory): string {
+function getItemsSelectionMessage({ emoji, name, items, footerInfo }: Category): string {
   let message = `${emoji} *${name}*\n\n`;
 
   items.forEach((item, index) => {

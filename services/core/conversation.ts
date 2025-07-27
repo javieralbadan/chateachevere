@@ -7,7 +7,7 @@ import type {
 } from '@/types/conversation';
 import { kv } from '@vercel/kv';
 
-const isDev = process.env.NODE_ENV === 'development';
+const logModule = process.env.LOG_CORE_CONVO || false;
 const localCache = new Map<string, CacheEntry<BaseConversation>>();
 
 export function createConversationManager<T extends BaseConversation>(
@@ -24,7 +24,7 @@ export function createConversationManager<T extends BaseConversation>(
     // Try local cache first
     const localEntry = localCache.get(key);
     if (localEntry && Date.now() < localEntry.expires) {
-      if (isDev) console.log('📱 Local cache hit:', key);
+      if (logModule) console.log('📱 Local cache hit:', key);
       return localEntry.data as T;
     }
 
@@ -34,7 +34,7 @@ export function createConversationManager<T extends BaseConversation>(
     // Try KV
     const kvData = await kv.get<T>(key);
     if (kvData) {
-      if (isDev) console.log('🗄️ KV hit, caching locally:', key);
+      if (logModule) console.log('🗄️ KV hit. Also caching locally:', key);
       localCache.set(key, { data: kvData, expires: Date.now() + timeoutMs });
     }
 
@@ -65,15 +65,14 @@ export function createConversationManager<T extends BaseConversation>(
     let conversation = await getFromCache(key);
 
     if (!conversation) {
+      if (logModule) console.log('🆕 Create conversation for:', key);
       conversation = {
         key,
         lastInteraction: Date.now(),
         ...initialConversation,
       } as T;
-
-      console.log('🆕 Create conversation for:', key);
     } else {
-      console.log('🔄 Update lastInteraction for:', key);
+      if (logModule) console.log('🔄 Only update lastInteraction for:', key);
     }
 
     await setToCache(key, conversation);
@@ -83,23 +82,22 @@ export function createConversationManager<T extends BaseConversation>(
   // Actualizar conversación
   const updateConversation = async (phoneNumber: string, updates: Partial<T>): Promise<void> => {
     const key = getKey(phoneNumber);
-    console.log('📝 Update conversation of:', key);
+    if (logModule) console.log('📝 Updating conversation of:', key);
+
     const current = await getFromCache(key);
     if (!current) return;
 
     const updated = { ...current, ...updates };
     await setToCache(key, updated);
 
-    if (isDev) {
-      console.log('📝 Updated conversation:', key, '▶️ currentStep:', updated.step);
-    }
+    if (logModule) console.log('📝 Updated conversation:', key, '▶️ currentStep:', updated.step);
   };
 
   // Limpiar conversación específica
   const clearConversation = async (phoneNumber: string): Promise<void> => {
     const key = getKey(phoneNumber);
-    console.log('🧹 Clear conversation of:', key);
     await deleteFromCache(key);
+    if (logModule) console.log('🧹 Clear conversation of:', key);
   };
 
   // Verificar si hay una conversación activa
@@ -120,7 +118,7 @@ export function createConversationManager<T extends BaseConversation>(
     getInitialConversation: () => InitialConvo<T>,
     getWelcomeMessage: () => string,
   ): Promise<string> => {
-    console.log('🚀 conversation processMessage:', { phoneNumber, message });
+    if (logModule) console.log('🚀 conversation processMessage:', { phoneNumber, message });
 
     const conversation = await getOrCreateConversation(phoneNumber, getInitialConversation());
     const isActive = await hasActiveConversation(phoneNumber);

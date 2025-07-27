@@ -2,7 +2,7 @@ import { handleCartActions, handleCheckout, handleQuantitySelection } from '@/se
 import { createConversationManager } from '@/services/core/conversation';
 import { handleCategorySelection, handleItemSelection } from '@/services/core/menu';
 import type { CartConversation, CartItem, InitialConvo, TenantHandler } from '@/types/conversation';
-import { Category, TENANT_CONFIG, TENANT_ID } from './config';
+import { TENANT_CONFIG, TENANT_ID, tenantCategories } from './config';
 import { getAddMoreItemsMessage, getFinalMessage, getWelcomeMessage } from './custom-messages';
 
 export const hasActiveConvo = (phone: string) => restaurantManager.hasActiveConversation(phone);
@@ -41,7 +41,7 @@ const handleCategorySelectionResponse: TenantHandler = async ({ phoneNumber, mes
   console.log('🗃️ handleCategorySelectionResponse [category_selection]');
   return handleCategorySelection({
     message,
-    categories: TENANT_CONFIG.categories,
+    categories: tenantCategories,
     welcomeMessageFn: getWelcomeMessage,
     updateConversationFn: (selectedCategory: string) =>
       restaurantManager.updateConversation(phoneNumber, {
@@ -59,7 +59,7 @@ const handleItemSelectionResponse: TenantHandler = async ({
   console.log('🪧 handleItemSelectionResponse [item_selection]');
   return handleItemSelection({
     message,
-    category: TENANT_CONFIG.categories[conversation.selectedCategory!],
+    category: tenantCategories[conversation.selectedCategory!],
     welcomeMessageFn: getWelcomeMessage,
     updateConversationFn: (opt, item) =>
       restaurantManager.updateConversation(phoneNumber, {
@@ -76,8 +76,8 @@ const handleQuantitySelectionResponse: TenantHandler = async ({ phoneNumber, mes
     phoneNumber,
     getInitialConversation(),
   );
-  const cat = TENANT_CONFIG.categories[conversation.selectedCategory as Category];
-  const menuItem = cat.items[conversation.selectedItemIndex!];
+  const currentCategory = tenantCategories[conversation.selectedCategory!];
+  const menuItem = currentCategory.items[conversation.selectedItemIndex!];
 
   return handleQuantitySelection({
     conversation,

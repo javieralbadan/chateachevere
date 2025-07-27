@@ -1,13 +1,28 @@
-import { SpanishConfiguration, TenantConfig } from '@/types/conversation';
+import { SequentialFlowConfig, TenantConfig } from '@/types/menu';
+import {
+  SpanishCategoriesFlowConfig,
+  SpanishSequentialFlowConfig,
+  SpanishTenantConfig,
+} from '@/types/menu-spanish';
 import { mapConfigSpanishToEnglish } from '@/utils/mappers/tenantConfig';
 import { DateTime } from 'luxon';
 
 const isDev = process.env.NODE_ENV === 'development';
+const logModule = process.env.LOG_TENANT_UTILS || false;
 
 export function isTestingOrder(tenantName: string): boolean {
   const tenantsTesters = ['cheefoodies'];
-  // TODO: Cambiar por attributo en Firestore
+  // TODO: Obtener desde Firestore attributo del tenant isTest
   return isDev || tenantsTesters.includes(tenantName);
+}
+
+export function isSequentialFlow(config: TenantConfig) {
+  if (!(config as SequentialFlowConfig).steps) {
+    return false;
+  }
+
+  const hasSteps = Object.keys((config as SequentialFlowConfig).steps)?.length > 0;
+  return typeof (config as SequentialFlowConfig).steps === 'object' && hasSteps;
 }
 
 export function isWeekend(): boolean {
@@ -17,32 +32,41 @@ export function isWeekend(): boolean {
   return dayOfWeek === 6 || dayOfWeek === 7;
 }
 
-function validateConfiguation(config: SpanishConfiguration): config is SpanishConfiguration {
+function validateConfiguration(config: SpanishTenantConfig): config is SpanishTenantConfig {
+  const isValidSequentialFlow =
+    (config as SpanishSequentialFlowConfig).etapas &&
+    typeof (config as SpanishSequentialFlowConfig).etapas === 'object';
+  const isValidCategories =
+    (config as SpanishCategoriesFlowConfig).categorias &&
+    typeof (config as SpanishCategoriesFlowConfig).categorias === 'object';
+
   return (
     config &&
     typeof config === 'object' &&
     typeof config.numeroTransferencias === 'string' &&
     typeof config.costoDomicilio === 'number' &&
-    config.categorias &&
-    typeof config.categorias === 'object'
+    (isValidCategories || isValidSequentialFlow)
   );
 }
 
-async function fetchConfigFromGist(url: string): Promise<SpanishConfiguration | null> {
+async function fetchConfigFromGist(url: string): Promise<SpanishTenantConfig | null> {
   try {
-    const response = await fetch(url, { cache: 'force-cache' });
+    if (logModule) console.log('> Fetching config from Gist url:', url);
+
+    const response = await fetch(url, { cache: 'no-cache' });
     if (!response.ok) {
       console.warn(`Error al fetchear configuración: ${response.status} ${response.statusText}`);
       return null;
     }
 
-    const data = (await response.json()) as SpanishConfiguration;
+    const data = (await response.json()) as SpanishTenantConfig;
 
-    if (!validateConfiguation(data)) {
+    if (!validateConfiguration(data)) {
       console.warn('Configuración desde Gist no tiene la estructura esperada');
       return null;
     }
 
+    if (logModule) console.log('⏬ Fetched config from Gist ~ data:', data);
     return data;
   } catch (error) {
     console.error('Error al fetchear o parsear configuración desde Gist:', error);
@@ -51,10 +75,13 @@ async function fetchConfigFromGist(url: string): Promise<SpanishConfiguration | 
 }
 
 export async function getTenantConfig(
-  fallbackData: SpanishConfiguration,
+  tenantId: string,
+  fallbackData: SpanishTenantConfig,
   fetchUrl?: string,
 ): Promise<TenantConfig> {
+  if (logModule) console.log('> getTenantConfig for:', tenantId);
   if (!fetchUrl) {
+    if (logModule) console.log('⚠️ Usando configuraciones fallback. No hay fetchUrl');
     return mapConfigSpanishToEnglish(fallbackData);
   }
 
@@ -65,12 +92,14 @@ export async function getTenantConfig(
 
     // Usar configuración de Gist si está disponible y es válida
     if (!configFromGist) {
-      console.error('⚠️ Usando configuraciones fallback');
+      if (logModule)
+        console.error('⚠️ Usando configuraciones fallback. No hay data al hacer fetch');
       return mapConfigSpanishToEnglish(fallbackData);
     }
 
     const mappedConfig = mapConfigSpanishToEnglish(configFromGist);
-    console.log('✅ Configuración cargada desde Gist', mappedConfig);
+    if (logModule) console.log('✅ Configuración cargada desde Gist', mappedConfig);
+
     return mappedConfig;
   } catch (error) {
     console.error('⚠️ Usando configuraciones fallback', error);

@@ -4,7 +4,11 @@ import { db, Timestamp } from '@/utils/server/firebase';
 import { isTestingOrder } from '@/utils/tenantUtils';
 import { calculateCartTotal, calculateDeliveryTotal } from './cart';
 
+const logModule = process.env.LOG_CORE_ORDER || false;
+
 export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps): OrderData => {
+  if (logModule) console.log('📝 Creando orden:', tenantInfo, phoneNumber, cart);
+
   try {
     const subtotal = calculateCartTotal(cart);
     const deliveryTotal = calculateDeliveryTotal(cart, tenantInfo.deliveryCost);
@@ -24,6 +28,7 @@ export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps)
       isTest: isTestingOrder(tenantInfo.name),
       createdAt: Timestamp.now(),
     };
+    if (logModule) console.log('🚀 Objeto orderData:', orderData);
 
     return orderData;
   } catch (error) {
@@ -33,7 +38,8 @@ export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps)
 };
 
 export const storeOrderInDB = async (orderData: OrderData): Promise<string> => {
-  console.log('📝 Guardando pedido en Firestore:', orderData);
+  if (logModule) console.log('📝 Guardando pedido en Firestore:', orderData);
+
   try {
     const docRef = await db.collection('orders').add(orderData);
 
@@ -45,6 +51,8 @@ export const storeOrderInDB = async (orderData: OrderData): Promise<string> => {
 };
 
 export const getOrderById = async (orderId: string): Promise<OrderData | null> => {
+  if (logModule) console.log('📝 Obteniendo pedido de Firestore:', orderId);
+
   try {
     const docRef = db.collection('orders').doc(orderId);
     const docSnap = await docRef.get();
@@ -52,7 +60,7 @@ export const getOrderById = async (orderId: string): Promise<OrderData | null> =
     if (docSnap.exists) {
       return { id: docSnap.id, ...docSnap.data() } as OrderData;
     } else {
-      console.log('❌ Pedido no encontrado');
+      if (logModule) console.log('❌ Pedido no encontrado');
       return null;
     }
   } catch (error) {

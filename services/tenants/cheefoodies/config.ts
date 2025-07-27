@@ -1,8 +1,9 @@
-import type { SpanishConfiguration, TenantConfig } from '@/types/conversation';
+import { CategoriesFlowConfig, TenantConfig } from '@/types/menu';
+import { SpanishTenantConfig } from '@/types/menu-spanish';
 import { getTenantConfig } from '@/utils/tenantUtils';
 
 // Configuración del menú - Fuente única de verdad
-export const fallbackData: SpanishConfiguration = {
+export const fallbackData: SpanishTenantConfig = {
   numeroTransferencias: '573112112565', // Número en formato: código país + número
   costoDomicilio: 2000, // En pesos, $2.000 por domicilio
   categorias: {
@@ -38,8 +39,7 @@ export const fallbackData: SpanishConfiguration = {
   },
 };
 
-// Intentar fetch de configuraciones desde Gist y mapear a inglés
-export const TENANT_CONFIG: TenantConfig = await getTenantConfig(fallbackData);
 export const TENANT_ID = 'cheefoodies';
-
-export type Category = keyof typeof TENANT_CONFIG.categories;
+// Intentar fetch de configuraciones desde Gist y mapear a inglés
+export const TENANT_CONFIG: TenantConfig = await getTenantConfig(TENANT_ID, fallbackData);
+export const tenantCategories = (TENANT_CONFIG as CategoriesFlowConfig).categories;
