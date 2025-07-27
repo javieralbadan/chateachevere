@@ -1,0 +1,92 @@
+{
+  "numeroTransferencias": "573016319103",
+  "costoDomicilio": 2000,
+  "categorias": {
+    "carnes": {
+      "nombre": "CARNES",
+      "emoji": "🥩",
+      "infoAdicional": "",
+      "items": [
+        { "nombre": "Parrilla Arrecha (cinco carnes)", "precio": 45000 },
+        { "nombre": "Parrilla Carne Brava", "precio": 40000 },
+        { "nombre": "Parrilla de la Casa", "precio": 43000 },
+        { "nombre": "Costillas BBQ o Salsa de Piña", "precio": 42000 },
+        { "nombre": "Lomo de Cerdo", "precio": 38000 },
+        { "nombre": "Churrasco a la Parrilla", "precio": 42000 },
+        { "nombre": "Pechuga a la Plancha o Gratinada o Salsa de Piña", "precio": 38000 },
+        { "nombre": "Mixta Santandereana", "precio": 38000 },
+        { "nombre": "Chigüiro al Horno", "precio": 40000 },
+        { "nombre": "Costillitas de Ternera", "precio": 40000 },
+        { "nombre": "Carne oreada", "precio": 42000 },
+        { "nombre": "Sobrebarriga al Horno", "precio": 42000 }
+      ]
+    },
+    "pescados": {
+      "nombre": "PESCADOS",
+      "emoji": "🐟",
+      "infoAdicional": "",
+      "items": [
+        { "nombre": "Mojarra Asada o Frita", "precio": 36000 },
+        { "nombre": "Mojarra en Salsa de Camarón", "precio": 45000 },
+        { "nombre": "Cazuela de Mariscos", "precio": 40000 },
+        { "nombre": "Bagre Frito o en Salsa Criolla", "precio": 36000 },
+        { "nombre": "Arroz con Camarón", "precio": 40000 },
+        { "nombre": "Trucha en Salsa de Camarón", "precio": 45000 },
+        { "nombre": "Trucha a la Plancha", "precio": 36000 },
+        { "nombre": "Bagre en Salsa de Camarón", "precio": 45000 }
+      ]
+    },
+    "sopas": {
+      "nombre": "SOPAS",
+      "emoji": "🍲",
+      "infoAdicional": "",
+      "items": [
+        { "nombre": "Mute Santandereano", "precio": 23000 },
+        { "nombre": "Mondongo", "precio": 23000 },
+        { "nombre": "Mazamorra Chiquita", "precio": 23000 },
+        { "nombre": "Cuchuco con Espinazo", "precio": 23000 },
+        { "nombre": "Ajiaco con Pollo", "precio": 23000 }
+      ]
+    },
+    "porciones": {
+      "nombre": "PORCIONES",
+      "emoji": "🍟",
+      "infoAdicional": "",
+      "items": [
+        { "nombre": "Papa Francesa", "precio": 8000 },
+        { "nombre": "Papa Salada", "precio": 6000 },
+        { "nombre": "Yuca", "precio": 6000 },
+        { "nombre": "Plátano", "precio": 6000 },
+        { "nombre": "Ensalada", "precio": 6000 },
+        { "nombre": "Arroz", "precio": 6000 },
+        { "nombre": "Arepa Boyacense", "precio": 3000 },
+        { "nombre": "Entrada: Chorizo + Yuca o Papa", "precio": 15000 },
+        { "nombre": "Entrada: Rellena + Yuca o Papa", "precio": 15000 }
+      ]
+    },
+    "bebidas": {
+      "nombre": "BEBIDAS",
+      "emoji": "🥤",
+      "infoAdicional": "",
+      "items": [
+        { "nombre": "Gaseosa personal y jugos hit", "precio": 4000 },
+        { "nombre": "Gaseosa familiar", "precio": 14000 },
+        { "nombre": "Gaseosa 1/4", "precio": 9000 },
+        { "nombre": "Agua botella", "precio": 3500 }
+      ]
+    },
+    "jugos": {
+      "nombre": "JUGOS",
+      "emoji": "🧃",
+      "infoAdicional": "",
+      "items": [
+        { "nombre": "Jugo Natural en Agua", "precio": 8000 },
+        { "nombre": "Jugo Natural en Leche", "precio": 9000 },
+        { "nombre": "Limonada Natural", "precio": 8000 },
+        { "nombre": "Limonada de Coco", "precio": 9000 },
+        { "nombre": "Limonada de Hierbabuena", "precio": 8000 },
+        { "nombre": "Cerezada", "precio": 9000 }
+      ]
+    }
+  }
+}

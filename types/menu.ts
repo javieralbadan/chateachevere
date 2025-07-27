@@ -13,7 +13,6 @@ export interface Category {
 
 export interface SequentialFlowStep extends Category {
   order: number;
-  priceSource?: boolean;
 }
 
 export interface TenantConfigBase {

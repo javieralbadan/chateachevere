@@ -13,7 +13,6 @@ export interface SpanishCategory {
 
 export interface SpanishSequentialFlowStep extends SpanishCategory {
   orden: number;
-  determinaElPrecio?: boolean;
 }
 
 export interface SpanishConfigurationBase {

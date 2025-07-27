@@ -51,7 +51,7 @@ export const handleQuantitySelection: QuantitySelectionFn = async ({
 };
 
 // Mensaje de acciones del carrito
-function getCartActionsMessage(cart: CartItem[], deliveryCost: number): string {
+export function getCartActionsMessage(cart: CartItem[], deliveryCost: number): string {
   let message = '🛒 *TU CARRITO*\n\n';
 
   cart.forEach((item) => {

@@ -31,7 +31,6 @@ function isSpanishSequentialFlow(config: SpanishTenantConfig) {
 function mapSequentialFlow(spanishConfig: SpanishSequentialFlowConfig) {
   const transformedSteps = spanishConfig.etapas.map((step) => ({
     order: step.orden,
-    priceSource: step.determinaElPrecio,
     name: step.nombre,
     emoji: step.emoji,
     footerInfo: step.infoAdicional || '',

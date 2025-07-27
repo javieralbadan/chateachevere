@@ -1,0 +1,45 @@
+{
+  "numeroTransferencias": "573016319103",
+  "costoDomicilio": 2000,
+  "mensajeInicial": "Este es el menú del día, te tomaré el pedido en este orden:",
+  "etapas": [
+    {
+      "orden": 1,
+      "nombre": "SOPA",
+      "emoji": "🍲",
+      "items": [
+        { "nombre": "Sopa de mute", "precio": 0 },
+        { "nombre": "Crema de verduras", "precio": 0 },
+        { "nombre": "Sancocho", "precio": 0 }
+      ]
+    },
+    {
+      "orden": 2,
+      "nombre": "PROTEÍNA",
+      "emoji": "🥩",
+      "items": [
+        { "nombre": "Frijol", "precio": 14000 },
+        { "nombre": "Garbanzo", "precio": 14000 },
+        { "nombre": "Cubios", "precio": 14000 },
+        { "nombre": "Proteínas", "precio": 14000 },
+        { "nombre": "Res", "precio": 14000 },
+        { "nombre": "Lomo", "precio": 14000 },
+        { "nombre": "Pechuga", "precio": 14000 },
+        { "nombre": "Hígado", "precio": 14000 },
+        { "nombre": "Pollo sudado", "precio": 15000 },
+        { "nombre": "Pollo en salsa de tocineta", "precio": 15000 },
+        { "nombre": "Recomendado de la 'casa': Estofado de cerdo", "precio": 17000 }
+      ]
+    },
+    {
+      "orden": 3,
+      "nombre": "BEBIDAS",
+      "emoji": "🥤",
+      "items": [
+        { "nombre": "Jugo de mora", "precio": 0 },
+        { "nombre": "Limonada", "precio": 0 },
+        { "nombre": "Agua", "precio": 0 }
+      ]
+    }
+  ]
+}

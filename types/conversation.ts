@@ -15,6 +15,8 @@ type ConversationStep =
   | 'category_selection' // Step genérico - escoger items de categoría -> first_level_selection
   | 'item_selection' // Step genérico - escoger items de categoría -> second_level_selection
   | 'quantity_selection'
+  | 'sequential_welcome'
+  | 'sequential_step_selection'
   | 'cart_actions'
   | 'checkout'
   | 'final';
@@ -44,6 +46,20 @@ export interface Conversation<T extends BaseConversation> {
 }
 
 export type InitialConvo<T> = Omit<T, 'key' | 'lastInteraction'>;
+
+export interface ConversationManager<T extends BaseConversation> {
+  getOrCreateConversation: (phoneNumber: string, initialConvo: InitialConvo<T>) => Promise<T>;
+  updateConversation: (phoneNumber: string, updates: Partial<T>) => Promise<void>;
+  clearConversation: (phoneNumber: string) => Promise<void>;
+  hasActiveConversation: (phoneNumber: string) => Promise<boolean>;
+  processMessage: (
+    phoneNumber: string,
+    message: string,
+    getInitialConversation: () => InitialConvo<T>,
+    getWelcomeMessage: () => string,
+  ) => Promise<string>;
+  registerStepHandler: (step: string, handler: StepHandler<T>) => void;
+}
 
 // ***************
 // MENU
@@ -79,12 +95,24 @@ export interface CartItem {
   itemIndex: number;
 }
 
+export interface SequentialSelection {
+  stepName: string;
+  selectedItem: {
+    name: string;
+    price: number;
+  };
+}
+
 // Extender BaseConversation para incluir los campos específicos del carrito
 export interface CartConversation extends BaseConversation {
   cart: CartItem[];
   selectedCategory?: string;
   selectedItem?: string;
   selectedItemIndex?: number;
+  sequentialFlow?: {
+    currentStep: number;
+    selections: Record<string, SequentialSelection>;
+  };
 }
 
 interface QuantitySelectionProps {
