@@ -22,6 +22,7 @@ export interface TenantConfigBase {
 
 export interface SequentialFlowConfig extends TenantConfigBase {
   initialMessage: string;
+  footerInfo?: string;
   steps: SequentialFlowStep[];
 }
 

@@ -17,9 +17,12 @@ type ConversationStep =
   | 'quantity_selection'
   | 'sequential_welcome'
   | 'sequential_step_selection'
+  | 'sequential_quantity_selection'
   | 'cart_actions'
   | 'checkout'
   | 'final';
+
+export type AddMoreItemsStep = ConversationStep & ('category_selection' | 'sequential_welcome');
 
 export interface ConversationConfig {
   tenantId: string;
@@ -112,6 +115,7 @@ export interface CartConversation extends BaseConversation {
   sequentialFlow?: {
     currentStep: number;
     selections: Record<string, SequentialSelection>;
+    customizedItem?: { name: string; price: number } | null;
   };
 }
 
@@ -133,6 +137,7 @@ interface CartActionsProps {
   updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
   welcomeMessageFn: GetWelcomeMessageFn;
   addMoreItemsFn: () => string;
+  addMoreStep: AddMoreItemsStep;
 }
 
 export type CartActionsFn = (Props: CartActionsProps) => Promise<string>;
@@ -154,6 +159,7 @@ interface CheckoutProps {
   welcomeMessageFn: GetWelcomeMessageFn;
   addMoreItemsFn: () => string;
   finalMessageFn: () => Promise<string>;
+  addMoreStep: AddMoreItemsStep;
 }
 
 export type CheckoutFn = (Props: CheckoutProps) => Promise<string>;

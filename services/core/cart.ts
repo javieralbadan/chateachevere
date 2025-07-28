@@ -7,6 +7,8 @@ import {
 } from '@/types/conversation';
 import { formatPrice } from '@/utils/formatters';
 
+const logModule = process.env.LOG_CORE_CART === 'true';
+
 export function calculateCartTotal(cart: CartItem[]): number {
   return cart.reduce((total, item) => total + item.price * item.quantity, 0);
 }
@@ -26,22 +28,26 @@ export const handleQuantitySelection: QuantitySelectionFn = async ({
   deliveryCost,
   updateConversationFn,
 }) => {
-  if (
-    quantity >= 1 &&
-    quantity <= 10 &&
+  const isValidRegularItem =
     conversation.selectedItem &&
     conversation.selectedCategory &&
-    conversation.selectedItemIndex !== undefined
-  ) {
+    conversation.selectedItemIndex !== undefined;
+  const isValidCustomizedItem =
+    conversation.sequentialFlow && conversation.sequentialFlow.customizedItem;
+
+  if (quantity >= 1 && quantity <= 10 && (isValidRegularItem || isValidCustomizedItem)) {
     // Agregar al carrito
     const cartItem: CartItem = {
-      name: conversation.selectedItem,
+      name: conversation.selectedItem || conversation.sequentialFlow!.customizedItem!.name,
       quantity,
       price,
-      category: conversation.selectedCategory,
-      itemIndex: conversation.selectedItemIndex,
+      category: conversation.selectedCategory || 'customized_item',
+      itemIndex: conversation.selectedItemIndex || 0,
     };
+
+    if (logModule) console.log('newCartItem:', cartItem);
     const updatedCart = [...conversation.cart, cartItem];
+    if (logModule) console.log('updatedCart:', updatedCart);
     await updateConversationFn(updatedCart);
 
     return getCartActionsMessage(updatedCart, deliveryCost);
@@ -88,12 +94,13 @@ export const handleCartActions: CartActionsFn = async ({
   updateConversationFn,
   welcomeMessageFn,
   addMoreItemsFn,
+  addMoreStep,
 }) => {
   // Titulo: "TU CARRITO"
   switch (option) {
     case 1:
       // Agregar más productos
-      await updateConversationFn({ step: 'category_selection' });
+      await updateConversationFn({ step: addMoreStep });
       return addMoreItemsFn();
 
     case 2:
@@ -111,7 +118,7 @@ export const handleCartActions: CartActionsFn = async ({
 
     case 3:
       // Vaciar carrito
-      await updateConversationFn({ cart: [], step: 'category_selection' });
+      await updateConversationFn({ cart: [], step: addMoreStep });
       return welcomeMessageFn('🗑️ Carrito vaciado!');
 
     default:
@@ -161,6 +168,7 @@ export const handleCheckout: CheckoutFn = async ({
   welcomeMessageFn,
   addMoreItemsFn,
   finalMessageFn,
+  addMoreStep,
 }) => {
   // Titulo: "CONFIRMACIÓN DE PEDIDO"
   switch (option) {
@@ -171,12 +179,12 @@ export const handleCheckout: CheckoutFn = async ({
 
     case 2:
       // Agregar más productos
-      await updateConversationFn({ step: 'category_selection' });
+      await updateConversationFn({ step: addMoreStep });
       return addMoreItemsFn();
 
     case 3:
       // Cancelar pedido
-      await updateConversationFn({ cart: [], step: 'category_selection' });
+      await updateConversationFn({ cart: [], step: addMoreStep });
       return welcomeMessageFn('❌ Pedido cancelado!');
 
     default:

@@ -136,6 +136,7 @@ export function createConversationManager<T extends BaseConversation>(
     }
 
     // Llamamos siempre con los tres parámetros
+    if (logModule) console.log('🚀 Llamando handler:', conversation.step);
     return handler({ phoneNumber, message, conversation });
   };
 

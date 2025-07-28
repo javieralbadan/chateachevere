@@ -2,33 +2,44 @@ import { createOrder, storeOrderInDB } from '@/services/core/order';
 import type { CartItem, GetWelcomeMessageFn, TenantInfo } from '@/types/conversation';
 import { SequentialFlowConfig } from '@/types/menu';
 import { formatPrice, numberToEmoji } from '@/utils/formatters';
-import { TENANT_CONFIG, TENANT_ID, tenantCategories } from './config';
+import { TENANT_CONFIG, TENANT_ID, tenantCategories, tenantSortedSteps } from './config';
 
 let categoriesListString = '';
 Object.keys(tenantCategories).forEach((key, index) => {
   const category = tenantCategories[key];
   categoriesListString += `${numberToEmoji(index + 1)} ${category.name.split(' ')[0]}\n`;
 });
+let stepsListString = '';
+tenantSortedSteps.forEach((step, index) => {
+  stepsListString += `${index > 0 ? ' - ' : ''}${step.name}`;
+});
 
-export const getSequentialWelcomeMessage = () => {
+// Mensajes flujo secuencial
+export const getSequentialWelcomeMessage = (msgPreliminar = '') => {
+  console.log('👋🏼 getSequentialWelcomeMessage');
   const config = TENANT_CONFIG as SequentialFlowConfig;
-  let message = `🍽️ Bienvenido a Carne Brava. ${config.initialMessage}\n\n`;
-
-  // Mostrar las etapas ordenadas
-  const sortedSteps = config.steps.sort((a, b) => a.order - b.order);
-  sortedSteps.forEach((step, index) => {
-    message += `${numberToEmoji(index + 1)} ${step.name}\n`;
-  });
-
+  let message = msgPreliminar ? `${msgPreliminar}\n\n` : '';
+  message += `🍽️ Bienvenido a Carne Brava. ${config.initialMessage}\n\n`;
+  message += `${stepsListString}\n`;
+  console.log('👋🏼 config.footerInfo', config.footerInfo);
+  if (config.footerInfo) message += `\n${config.footerInfo}\n`;
   message += '\n*Responde 1 para continuar*';
   return message;
 };
 
-// Mensaje de bienvenida
+export const getSequentialAddMoreItemsMessage = () => {
+  console.log('👋🏼 getSequentialAddMoreItemsMessage');
+  let message =
+    '¿Qué deseas añadir a tu pedido? Recuerda que la selección se hace en este orden\n\n';
+  message += `${stepsListString}\n`;
+  message += '\n*Responde 1 para continuar*';
+  return message;
+};
+
+// Mensajes flujo por categorías
 export const getWelcomeMessage: GetWelcomeMessageFn = (msgPreliminar = '') => {
   console.log('👋🏼 getWelcomeMessage');
   let message = msgPreliminar ? `${msgPreliminar}\n\n` : '';
-  // prettier-ignore
   message += '🍽️ Bienvenido a Carne Brava, ¿qué deseas pedir?\n\n';
   message += categoriesListString;
   message += '\n*Elige un número*';
@@ -73,8 +84,7 @@ export const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Pr
   message += '• Comprobante de pago\n';
   message += '• Dirección completa\n';
   message += '• Nombre y teléfono de contacto\n\n';
-  // prettier-ignore
-  message += '¡Gracias por elegir CheFoodie\'s!\n\n';
+  message += '¡Gracias por elegir Carne Brava!\n\n';
 
   return message;
 };

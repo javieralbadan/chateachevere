@@ -1,4 +1,4 @@
-import { CategoriesFlowConfig, TenantConfig } from '@/types/menu';
+import { CategoriesFlowConfig, SequentialFlowConfig, TenantConfig } from '@/types/menu';
 import { getTenantConfig, isWeekend } from '@/utils/tenantUtils';
 import CONFIGURACION_SEMANA from './menu_dia_semana.json';
 import CONFIGURACION_FIN_DE_SEMANA from './menu_fin_de_semana.json';
@@ -17,7 +17,7 @@ const dataSourceMap = {
   },
 };
 
-const dataConfig = !isWeekend() ? dataSourceMap.weekend : dataSourceMap.week;
+const dataConfig = isWeekend() ? dataSourceMap.weekend : dataSourceMap.week;
 
 export const TENANT_ID = 'carne-brava';
 export const TENANT_CONFIG: TenantConfig = await getTenantConfig(
@@ -26,3 +26,5 @@ export const TENANT_CONFIG: TenantConfig = await getTenantConfig(
   dataConfig.gistUrl,
 );
 export const tenantCategories = (TENANT_CONFIG as CategoriesFlowConfig).categories || {};
+export const tenantSortedSteps =
+  (TENANT_CONFIG as SequentialFlowConfig).steps.sort((a, b) => a.order - b.order) || [];

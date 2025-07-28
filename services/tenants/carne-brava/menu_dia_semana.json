@@ -2,6 +2,7 @@
   "numeroTransferencias": "573016319103",
   "costoDomicilio": 2000,
   "mensajeInicial": "Este es el menú del día, te tomaré el pedido en este orden:",
+  "infoAdicional": "La bandeja además de principio y proteína, lleva arroz y ensalada.",
   "etapas": [
     {
       "orden": 1,
@@ -21,7 +22,6 @@
         { "nombre": "Frijol", "precio": 14000 },
         { "nombre": "Garbanzo", "precio": 14000 },
         { "nombre": "Cubios", "precio": 14000 },
-        { "nombre": "Proteínas", "precio": 14000 },
         { "nombre": "Res", "precio": 14000 },
         { "nombre": "Lomo", "precio": 14000 },
         { "nombre": "Pechuga", "precio": 14000 },

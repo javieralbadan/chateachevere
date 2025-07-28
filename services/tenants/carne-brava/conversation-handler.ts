@@ -2,12 +2,19 @@ import { handleCartActions, handleCheckout, handleQuantitySelection } from '@/se
 import { createConversationManager } from '@/services/core/conversation';
 import { handleCategorySelection, handleItemSelection } from '@/services/core/menu';
 import { createSequentialHandlers } from '@/services/core/menu-sequential-handlers';
-import type { CartConversation, CartItem, InitialConvo, TenantHandler } from '@/types/conversation';
+import type {
+  AddMoreItemsStep,
+  CartConversation,
+  CartItem,
+  InitialConvo,
+  TenantHandler,
+} from '@/types/conversation';
 import { isSequentialFlow } from '@/utils/tenantUtils';
 import { TENANT_CONFIG, TENANT_ID, tenantCategories } from './config';
 import {
   getAddMoreItemsMessage,
   getFinalMessage,
+  getSequentialAddMoreItemsMessage,
   getSequentialWelcomeMessage,
   getWelcomeMessage,
 } from './custom-messages';
@@ -113,6 +120,7 @@ const handleQuantitySelectionResponse: TenantHandler = async ({ phoneNumber, mes
 
 const handleCartActionsResponse: TenantHandler = async ({ phoneNumber, message, conversation }) => {
   console.log('📮 handleCartActionsResponse [cart_actions] "TU CARRITO"');
+  const { addMoreItemsFn, addMoreStep } = getAddMoreItemsFnAndMssg();
   return handleCartActions({
     conversation,
     option: parseInt(message.trim(), 10),
@@ -121,12 +129,14 @@ const handleCartActionsResponse: TenantHandler = async ({ phoneNumber, message, 
     updateConversationFn: (upd: Partial<CartConversation>) =>
       restaurantManager.updateConversation(phoneNumber, upd),
     welcomeMessageFn: getWelcomeMessage,
-    addMoreItemsFn: getAddMoreItemsMessage,
+    addMoreItemsFn,
+    addMoreStep,
   });
 };
 
 const handleCheckoutResponse: TenantHandler = async ({ phoneNumber, message, conversation }) => {
   console.log('🛫 handleCheckoutResponse [checkout] "CONFIRMACIÓN DE PEDIDO"');
+  const { addMoreItemsFn, addMoreStep } = getAddMoreItemsFnAndMssg();
   return handleCheckout({
     conversation,
     option: parseInt(message.trim(), 10),
@@ -135,7 +145,8 @@ const handleCheckoutResponse: TenantHandler = async ({ phoneNumber, message, con
     updateConversationFn: (upd: Partial<CartConversation>) =>
       restaurantManager.updateConversation(phoneNumber, upd),
     welcomeMessageFn: getWelcomeMessage,
-    addMoreItemsFn: getAddMoreItemsMessage,
+    addMoreItemsFn,
+    addMoreStep,
     finalMessageFn: () => handleFinishConvo(phoneNumber, conversation.cart),
   });
 };
@@ -161,12 +172,18 @@ const restaurantManager = createConversationManager<CartConversation>({
     checkout: handleCheckoutResponse,
   },
 });
-// TODO: Enviar params como objeto
-const sequentialHandlers = createSequentialHandlers(
-  TENANT_CONFIG,
-  restaurantManager,
+
+const sequentialHandlers = createSequentialHandlers({
+  tenantConfig: TENANT_CONFIG,
+  manager: restaurantManager,
   getInitialConversation,
-);
+  customMessages: {
+    getSequentialWelcomeMessage,
+    getSequentialAddMoreItemsMessage,
+    getWelcomeMessage,
+    getAddMoreItemsMessage,
+  },
+});
 restaurantManager.registerStepHandler(
   'sequential_welcome',
   sequentialHandlers.handleSequentialWelcomeResponse,
@@ -175,3 +192,22 @@ restaurantManager.registerStepHandler(
   'sequential_step_selection',
   sequentialHandlers.handleSequentialStepSelectionResponse,
 );
+restaurantManager.registerStepHandler(
+  'sequential_quantity_selection',
+  sequentialHandlers.handleSequentialQuantitySelectionResponse,
+);
+
+const getAddMoreItemsFnAndMssg = (): {
+  addMoreItemsFn: () => string;
+  addMoreStep: AddMoreItemsStep;
+} => {
+  // Determinar función de agregar más items según el tipo de flujo
+  const addMoreItemsFn = isSequentialFlow(TENANT_CONFIG)
+    ? getSequentialAddMoreItemsMessage
+    : getAddMoreItemsMessage;
+
+  // Determinar step de destino para "agregar más productos"
+  const addMoreStep = isSequentialFlow(TENANT_CONFIG) ? 'sequential_welcome' : 'category_selection';
+
+  return { addMoreItemsFn, addMoreStep };
+};

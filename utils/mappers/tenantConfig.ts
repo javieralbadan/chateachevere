@@ -46,6 +46,7 @@ function mapSequentialFlow(spanishConfig: SpanishSequentialFlowConfig) {
     transfersPhoneNumber: spanishConfig.numeroTransferencias,
     deliveryCost: spanishConfig.costoDomicilio,
     initialMessage: spanishConfig.mensajeInicial,
+    footerInfo: spanishConfig.infoAdicional || '',
     steps: transformedSteps,
   } as SequentialFlowConfig;
 }

@@ -22,6 +22,7 @@ export interface SpanishConfigurationBase {
 
 export interface SpanishSequentialFlowConfig extends SpanishConfigurationBase {
   mensajeInicial: string;
+  infoAdicional?: string;
   etapas: SpanishSequentialFlowStep[];
 }
 

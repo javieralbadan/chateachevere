@@ -103,6 +103,7 @@ const handleCartActionsResponse: TenantHandler = async ({ phoneNumber, message, 
       restaurantManager.updateConversation(phoneNumber, upd),
     welcomeMessageFn: getWelcomeMessage,
     addMoreItemsFn: getAddMoreItemsMessage,
+    addMoreStep: 'category_selection',
   });
 };
 
@@ -117,6 +118,7 @@ const handleCheckoutResponse: TenantHandler = async ({ phoneNumber, message, con
       restaurantManager.updateConversation(phoneNumber, upd),
     welcomeMessageFn: getWelcomeMessage,
     addMoreItemsFn: getAddMoreItemsMessage,
+    addMoreStep: 'category_selection',
     finalMessageFn: () => handleFinishConvo(phoneNumber, conversation.cart),
   });
 };

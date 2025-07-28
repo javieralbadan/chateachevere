@@ -7,24 +7,49 @@ import type {
 } from '@/types/conversation';
 import { Category, MenuItem, SequentialFlowConfig, TenantConfig } from '@/types/menu';
 import { formatPrice, numberToEmoji } from '@/utils/formatters';
-import { getWelcomeMessage } from '../tenants/carne-brava/custom-messages';
-import { getCartActionsMessage } from './cart';
+import { handleQuantitySelection } from './cart';
 
-export const createSequentialHandlers = (
-  tenantConfig: TenantConfig,
-  manager: ConversationManager<CartConversation>,
-  getInitialConversation: () => InitialConvo<CartConversation>,
-) => {
+const logModule = process.env.LOG_CORE_MENU === 'true';
+interface Props {
+  tenantConfig: TenantConfig;
+  manager: ConversationManager<CartConversation>;
+  getInitialConversation: () => InitialConvo<CartConversation>;
+  customMessages: Record<string, (props?: string) => string>;
+}
+
+export const createSequentialHandlers = ({
+  tenantConfig,
+  manager,
+  getInitialConversation,
+  customMessages,
+}: Props) => {
   const config = tenantConfig as SequentialFlowConfig;
   // Handler para el mensaje de bienvenida secuencial
-  const handleSequentialWelcomeResponse: TenantHandler = async ({ phoneNumber }) => {
-    // Ordenar las etapas por el atributo "orden"
+  const handleSequentialWelcomeResponse: TenantHandler = async ({ phoneNumber, message }) => {
+    const option = parseInt(message.trim(), 10);
+
+    if (option !== 1) {
+      const conversation = await manager.getOrCreateConversation(
+        phoneNumber,
+        getInitialConversation(),
+      );
+
+      const hasItemsInCart = conversation.cart.length > 0;
+      if (logModule) console.log('hasItemsInCart:', hasItemsInCart);
+
+      // Repetir el mensaje secuencial de bienvenida o de añadir más items
+      return hasItemsInCart
+        ? customMessages.getSequentialAddMoreItemsMessage()
+        : customMessages.getSequentialWelcomeMessage();
+    }
+
+    if (logModule) console.log('handleSequentialWelcomeResponse:', option);
     const sortedSteps = config.steps.sort((a, b) => a.order - b.order);
 
     await manager.updateConversation(phoneNumber, {
       step: 'sequential_step_selection',
       sequentialFlow: {
-        currentStep: sortedSteps[0].order, // Empezar con el primer step
+        currentStep: sortedSteps[0].order,
         selections: {},
       },
     });
@@ -38,20 +63,20 @@ export const createSequentialHandlers = (
     message,
     conversation,
   }) => {
-    const option = parseInt(message.trim(), 10);
-
     if (!conversation.sequentialFlow) {
       // Error: no debería llegar aquí sin flujo secuencial
-      return getWelcomeMessage('❌ Error en el flujo. Reiniciando...');
+      return customMessages.getWelcomeMessage('❌ Error en el flujo. Reiniciando...');
     }
 
+    const option = parseInt(message.trim(), 10);
+    if (logModule) console.log('handleSequentialStepSelectionResponse:', option);
     // Encontrar el step actual
     const currentStep = config.steps.find(
       (step) => step.order === conversation.sequentialFlow!.currentStep,
     );
 
     if (!currentStep) {
-      return getWelcomeMessage('❌ Error en el flujo. Reiniciando...');
+      return customMessages.getWelcomeMessage('❌ Error en el flujo. Reiniciando...');
     }
 
     // Validar opción
@@ -59,8 +84,8 @@ export const createSequentialHandlers = (
       return `❌ Opción no válida.\n\n${getSequentialStepMessage(currentStep)}`;
     }
 
-    // Guardar selección
     const selectedItem = currentStep.items[option - 1];
+    if (logModule) console.log('Guardar selección:', selectedItem);
     const updatedSelections = {
       ...conversation.sequentialFlow.selections,
       [currentStep.name]: {
@@ -72,6 +97,8 @@ export const createSequentialHandlers = (
       },
     };
 
+    if (logModule) console.log('updatedSelections:', updatedSelections);
+
     // Verificar si hay más steps
     const sortedSteps = config.steps.sort((a, b) => a.order - b.order);
     const currentStepIndex = sortedSteps.findIndex(
@@ -80,10 +107,10 @@ export const createSequentialHandlers = (
     const isLastStep = currentStepIndex === sortedSteps.length - 1;
 
     if (isLastStep) {
-      // Completar el almuerzo y agregarlo al carrito
+      if (logModule) console.log('(isLastStep) Completar flujo secuencial');
       return await completeSequentialFlow(phoneNumber, updatedSelections);
     } else {
-      // Continuar al siguiente step
+      if (logModule) console.log('Continuando al siguiente step');
       const nextStep = sortedSteps[currentStepIndex + 1];
       await manager.updateConversation(phoneNumber, {
         sequentialFlow: {
@@ -105,9 +132,7 @@ export const createSequentialHandlers = (
       message += `${numberToEmoji(index + 1)} ${item.name}${priceText}\n`;
     });
 
-    if (step.footerInfo) {
-      message += `\n${step.footerInfo}\n`;
-    }
+    if (step.footerInfo) message += `\n${step.footerInfo}\n`;
 
     message += '\n*Elige un número*';
     return message;
@@ -118,43 +143,62 @@ export const createSequentialHandlers = (
     phoneNumber: string,
     selections: Record<string, SequentialSelection>,
   ): Promise<string> {
-    // Crear el nombre del almuerzo combinando todas las selecciones
-    const itemNames = Object.values(selections).map(
-      (sel: SequentialSelection) => sel.selectedItem.name,
-    );
-    const lunchName = itemNames.join(' + ');
+    if (logModule) console.log('completeSequentialFlow selections:', selections);
 
-    // Calcular el precio total sumando todos los precios
-    const totalPrice = Object.values(selections).reduce((sum: number, sel: SequentialSelection) => {
-      return sum + sel.selectedItem.price;
-    }, 0);
+    // Crear el nombre del item combinando todas las selecciones
+    // TODO: extract Object.values(selections)
+    const selectionsValues = Object.values(selections);
+    const itemNames = selectionsValues.map((sel) => sel.selectedItem.name);
+    const itemFullName = itemNames.join(' + ');
+    const price = selectionsValues.reduce((sum, sel) => sum + sel.selectedItem.price, 0);
+    if (logModule) console.log('Precio total acumulado en el flujo actual:', price);
 
-    // Crear el CartItem para el almuerzo completo
-    const lunchItem = {
-      name: lunchName,
-      quantity: 1,
-      price: totalPrice,
-      category: 'almuerzo_completo',
-      itemIndex: 0,
-    };
-
-    // Obtener conversación actual y agregar al carrito
-    const conversation = await manager.getOrCreateConversation(
-      phoneNumber,
-      getInitialConversation(),
-    );
-
-    const updatedCart = [...conversation.cart, lunchItem];
-
-    // Actualizar conversación al step de cart_actions y limpiar sequentialFlow
+    // Actualizar conversación al step de sequential_quantity_selection
     await manager.updateConversation(phoneNumber, {
-      step: 'cart_actions',
-      cart: updatedCart,
-      sequentialFlow: undefined, // Limpiar el flujo secuencial
+      step: 'sequential_quantity_selection',
+      sequentialFlow: {
+        currentStep: 0, // Reset step
+        selections,
+        customizedItem: { name: itemFullName, price },
+      },
     });
 
-    return getCartActionsMessage(updatedCart, tenantConfig.deliveryCost);
+    // Mostrar mensaje de cantidad
+    let message = `📦 *${itemFullName}*\n`;
+    message += `Precio: ${formatPrice(price)}\n\n`;
+    message += '¿Cuántos deseas?\n\n*Responde con un número (1-10)*';
+
+    return message;
   }
 
-  return { handleSequentialWelcomeResponse, handleSequentialStepSelectionResponse };
+  const handleSequentialQuantitySelectionResponse: TenantHandler = async ({
+    phoneNumber,
+    message,
+    conversation,
+  }) => {
+    if (!conversation.sequentialFlow?.customizedItem) {
+      return customMessages.getWelcomeMessage('❌ Error en el flujo. Reiniciando...');
+    }
+
+    if (logModule) console.log('🧮 handleResponse [sequential_quantity_selection]');
+    return handleQuantitySelection({
+      conversation,
+      quantity: parseInt(message.trim(), 10),
+      price: conversation.sequentialFlow.customizedItem.price,
+      deliveryCost: tenantConfig.deliveryCost,
+      updateConversationFn: (updatedCart) =>
+        // Actualizar conversación al step de cart_actions y limpiar sequentialFlow
+        manager.updateConversation(phoneNumber, {
+          step: 'cart_actions',
+          cart: updatedCart,
+          sequentialFlow: undefined,
+        }),
+    });
+  };
+
+  return {
+    handleSequentialWelcomeResponse,
+    handleSequentialStepSelectionResponse,
+    handleSequentialQuantitySelectionResponse,
+  };
 };
