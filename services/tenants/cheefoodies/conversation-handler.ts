@@ -5,6 +5,8 @@ import type { CartConversation, CartItem, InitialConvo, TenantHandler } from '@/
 import { TENANT_CONFIG, TENANT_ID, tenantCategories } from './config';
 import { getAddMoreItemsMessage, getFinalMessage, getWelcomeMessage } from './custom-messages';
 
+const logModule = process.env.LOG_TENANT_CONVO === 'true';
+
 export const hasActiveConvo = (phone: string) => restaurantManager.hasActiveConversation(phone);
 export const clearConvo = (phone: string) => restaurantManager.clearConversation(phone);
 
@@ -38,7 +40,7 @@ const handleWelcomeResponse: TenantHandler = async ({ phoneNumber }) => {
 };
 
 const handleCategorySelectionResponse: TenantHandler = async ({ phoneNumber, message }) => {
-  console.log('🗃️ handleCategorySelectionResponse [category_selection]');
+  if (logModule) console.log('🗃️ handleCategorySelectionResponse [category_selection]');
   return handleCategorySelection({
     message,
     categories: tenantCategories,
@@ -56,7 +58,7 @@ const handleItemSelectionResponse: TenantHandler = async ({
   message,
   conversation,
 }) => {
-  console.log('🪧 handleItemSelectionResponse [item_selection]');
+  if (logModule) console.log('🪧 handleItemSelectionResponse [item_selection]');
   return handleItemSelection({
     message,
     category: tenantCategories[conversation.selectedCategory!],
@@ -71,7 +73,7 @@ const handleItemSelectionResponse: TenantHandler = async ({
 };
 
 const handleQuantitySelectionResponse: TenantHandler = async ({ phoneNumber, message }) => {
-  console.log('🧮 handleQuantitySelectionResponse [quantity_selection]');
+  if (logModule) console.log('🧮 handleQuantitySelectionResponse [quantity_selection]');
   const conversation = await restaurantManager.getOrCreateConversation(
     phoneNumber,
     getInitialConversation(),
@@ -93,7 +95,7 @@ const handleQuantitySelectionResponse: TenantHandler = async ({ phoneNumber, mes
 };
 
 const handleCartActionsResponse: TenantHandler = async ({ phoneNumber, message, conversation }) => {
-  console.log('📮 handleCartActionsResponse [cart_actions] "TU CARRITO"');
+  if (logModule) console.log('📮 handleCartActionsResponse [cart_actions] "TU CARRITO"');
   return handleCartActions({
     conversation,
     option: parseInt(message.trim(), 10),
@@ -108,7 +110,7 @@ const handleCartActionsResponse: TenantHandler = async ({ phoneNumber, message, 
 };
 
 const handleCheckoutResponse: TenantHandler = async ({ phoneNumber, message, conversation }) => {
-  console.log('🛫 handleCheckoutResponse [checkout] "CONFIRMACIÓN DE PEDIDO"');
+  if (logModule) console.log('🛫 handleCheckoutResponse [checkout] "CONFIRMACIÓN DE PEDIDO"');
   return handleCheckout({
     conversation,
     option: parseInt(message.trim(), 10),

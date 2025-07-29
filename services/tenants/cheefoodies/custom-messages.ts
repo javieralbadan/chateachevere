@@ -3,6 +3,8 @@ import type { CartItem, GetWelcomeMessageFn, TenantInfo } from '@/types/conversa
 import { formatPrice, numberToEmoji } from '@/utils/formatters';
 import { TENANT_CONFIG, TENANT_ID, tenantCategories } from './config';
 
+const logModule = process.env.LOG_TENANT_CONVO === 'true';
+
 let categoriesListString = '';
 Object.keys(tenantCategories).forEach((key, index) => {
   const category = tenantCategories[key];
@@ -11,7 +13,7 @@ Object.keys(tenantCategories).forEach((key, index) => {
 
 // Mensaje de bienvenida
 export const getWelcomeMessage: GetWelcomeMessageFn = (msgPreliminar = '') => {
-  console.log('👋🏼 getWelcomeMessage');
+  if (logModule) console.log('👋🏼 getWelcomeMessage');
   let message = msgPreliminar ? `${msgPreliminar}\n\n` : '';
   // prettier-ignore
   message += '🍽️ Bienvenido a CheFoodie\'s, ¿qué deseas pedir?\n\n';
@@ -22,7 +24,7 @@ export const getWelcomeMessage: GetWelcomeMessageFn = (msgPreliminar = '') => {
 
 // Mensaje al seleccionar "agregar más items"
 export const getAddMoreItemsMessage = () => {
-  console.log('👋🏼 getAddMoreItemsMessage');
+  if (logModule) console.log('👋🏼 getAddMoreItemsMessage');
   let message = '¿Qué deseas añadir a tu pedido?\n\n';
   message += categoriesListString;
   message += '\n*Elige un número*';
@@ -31,7 +33,7 @@ export const getAddMoreItemsMessage = () => {
 
 // Mensaje final
 export const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Promise<string> => {
-  console.log('🏁 getFinalMessage');
+  if (logModule) console.log('🏁 getFinalMessage');
   const tenantInfo: TenantInfo = {
     name: TENANT_ID,
     transfersPhoneNumber: TENANT_CONFIG.transfersPhoneNumber,
@@ -39,7 +41,7 @@ export const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Pr
   };
   const orderData = createOrder({ tenantInfo, phoneNumber, cart });
   const orderId = await storeOrderInDB(orderData);
-  console.log('🚀 ~ getFinalMessage ~ orderId, orderData:', orderId, orderData);
+  if (logModule) console.log('🚀 ~ getFinalMessage ~ orderId, orderData:', orderId, orderData);
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://chatea-chevere.vercel.app';
   const fetchOrderUrl = `${baseUrl}/api/pedido/${orderId}`;

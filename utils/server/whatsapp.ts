@@ -124,9 +124,9 @@ export async function getResponseMessage(
     }
 
     // Direccionar conversación (nueva o existente) con su respectivo tenant handler
-    const isRestaurantActive = await cheefoodies.hasActiveConvo(phoneNumber);
-    if (isRestaurantActive || lowerMessage.includes('restaurante')) {
-      console.log('🍽️ Procesando como conversación de restaurante');
+    const isCheefoodiesActive = await cheefoodies.hasActiveConvo(phoneNumber);
+    if (isCheefoodiesActive || lowerMessage.includes('domicilios')) {
+      console.log('🍽️ Procesando como conversación de Cheefoodies');
       return await cheefoodies.conversationHandler(phoneNumber, incomingMessage);
     }
 
@@ -137,9 +137,16 @@ export async function getResponseMessage(
     }
 
     // Si no es ninguno, devolver el mensaje de bienvenida
-    return '👋🏼 Hola. Este es un mensaje automático de bienvenida.\n\nEscribe *"restaurante"* para probar una conversación que finaliza redirigiendo a otro whatsapp para control de pedidos y pagos.';
+    return getInitialAutoReply();
   } catch (error) {
     console.error('❌ Error en getResponseMessage:', error);
     return 'Lo siento, ocurrió un error. Intenta nuevamente.';
   }
 }
+
+const getInitialAutoReply =
+  () => `👋🏼 Hola. Este es un mensaje automático de bienvenida. Tenemos los siguientes flujos de conversación para probar:\n
+"*domicilios*": selección de items por categorías\n
+"*brava*": flujo por categorías los fines de semana y flujo secuencial para personalizar un almuerzo entre semana\n
+*Responde una de las palabras para iniciar*
+`;
