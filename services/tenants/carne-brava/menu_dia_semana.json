@@ -16,12 +16,19 @@
     },
     {
       "orden": 2,
+      "nombre": "PRINCIPIO",
+      "emoji": "🫘",
+      "items": [
+        { "nombre": "Frijol", "precio": 0 },
+        { "nombre": "Garbanzo", "precio": 0 },
+        { "nombre": "Cubios", "precio": 0 }
+      ]
+    },
+    {
+      "orden": 3,
       "nombre": "PROTEÍNA",
       "emoji": "🥩",
       "items": [
-        { "nombre": "Frijol", "precio": 14000 },
-        { "nombre": "Garbanzo", "precio": 14000 },
-        { "nombre": "Cubios", "precio": 14000 },
         { "nombre": "Res", "precio": 14000 },
         { "nombre": "Lomo", "precio": 14000 },
         { "nombre": "Pechuga", "precio": 14000 },
@@ -32,13 +39,12 @@
       ]
     },
     {
-      "orden": 3,
+      "orden": 4,
       "nombre": "BEBIDAS",
       "emoji": "🥤",
       "items": [
         { "nombre": "Jugo de mora", "precio": 0 },
-        { "nombre": "Limonada", "precio": 0 },
-        { "nombre": "Agua", "precio": 0 }
+        { "nombre": "Limonada", "precio": 0 }
       ]
     }
   ]

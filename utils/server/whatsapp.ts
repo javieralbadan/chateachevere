@@ -117,7 +117,6 @@ export async function getResponseMessage(
 
   const lowerMessage = incomingMessage.toLowerCase();
   try {
-    // TODO: Check this behavior in prod
     if (lowerMessage.includes('reiniciar')) {
       await carneBrava.clearConvo(phoneNumber);
       await cheefoodies.clearConvo(phoneNumber);
@@ -145,8 +144,8 @@ export async function getResponseMessage(
 }
 
 const getInitialAutoReply =
-  () => `👋🏼 Hola. Este es un mensaje automático de bienvenida. Tenemos los siguientes flujos de conversación para probar:\n
-"*domicilios*": selección de items por categorías\n
+  () => `Te damos la bienvenida al chat automático de prueba 👋🏼. Con las siguientes palabras puedes iniciar diferentes flujos de conversación:\n
+"*domicilios*": selección de items (comida) por categorías\n
 "*brava*": flujo por categorías los fines de semana y flujo secuencial para personalizar un almuerzo entre semana\n
-*Responde una de las palabras para iniciar*
+*Responde con una de las palabras*
 `;

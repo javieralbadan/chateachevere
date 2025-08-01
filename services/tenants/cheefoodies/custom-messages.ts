@@ -1,15 +1,16 @@
-import { createOrder, storeOrderInDB } from '@/services/core/order';
-import type { CartItem, GetWelcomeMessageFn, TenantInfo } from '@/types/conversation';
+import type { GetFinalMessageProps, GetWelcomeMessageFn } from '@/types/menu';
 import { formatPrice, numberToEmoji } from '@/utils/formatters';
-import { TENANT_CONFIG, TENANT_ID, tenantCategories } from './config';
+import { tenantCategories } from './config';
 
 const logModule = process.env.LOG_TENANT_CONVO === 'true';
 
-let categoriesListString = '';
-Object.keys(tenantCategories).forEach((key, index) => {
-  const category = tenantCategories[key];
-  categoriesListString += `${numberToEmoji(index + 1)} ${category.name.split(' ')[0]}\n`;
-});
+const categoriesKeys = Object.keys(tenantCategories || {});
+const categoriesListString = categoriesKeys
+  .map((key, index) => {
+    const category = tenantCategories[key];
+    return `${numberToEmoji(index + 1)} ${category.name.split(' ')[0]}`;
+  })
+  .join('\n');
 
 // Mensaje de bienvenida
 export const getWelcomeMessage: GetWelcomeMessageFn = (msgPreliminar = '') => {
@@ -17,31 +18,23 @@ export const getWelcomeMessage: GetWelcomeMessageFn = (msgPreliminar = '') => {
   let message = msgPreliminar ? `${msgPreliminar}\n\n` : '';
   // prettier-ignore
   message += '🍽️ Bienvenido a CheFoodie\'s, ¿qué deseas pedir?\n\n';
-  message += categoriesListString;
-  message += '\n*Elige un número*';
+  message += `${categoriesListString}\n\n`;
+  message += `*Elige un número (1-${categoriesKeys.length})*`;
   return message;
 };
 
 // Mensaje al seleccionar "agregar más items"
-export const getAddMoreItemsMessage = () => {
-  if (logModule) console.log('👋🏼 getAddMoreItemsMessage');
+export const getRepeatFlowMessage = () => {
+  if (logModule) console.log('👋🏼 getRepeatFlowMessage');
   let message = '¿Qué deseas añadir a tu pedido?\n\n';
-  message += categoriesListString;
-  message += '\n*Elige un número*';
+  message += `${categoriesListString}\n\n`;
+  message += `*Elige un número (1-${categoriesKeys.length})*`;
   return message;
 };
 
 // Mensaje final
-export const getFinalMessage = async (phoneNumber: string, cart: CartItem[]): Promise<string> => {
-  if (logModule) console.log('🏁 getFinalMessage');
-  const tenantInfo: TenantInfo = {
-    name: TENANT_ID,
-    transfersPhoneNumber: TENANT_CONFIG.transfersPhoneNumber,
-    deliveryCost: TENANT_CONFIG.deliveryCost,
-  };
-  const orderData = createOrder({ tenantInfo, phoneNumber, cart });
-  const orderId = await storeOrderInDB(orderData);
-  if (logModule) console.log('🚀 ~ getFinalMessage ~ orderId, orderData:', orderId, orderData);
+export const getFinalMessage = ({ orderId, orderData }: GetFinalMessageProps): string => {
+  if (logModule) console.log('🏁 getFinalMessage', orderId, orderData);
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://chatea-chevere.vercel.app';
   const fetchOrderUrl = `${baseUrl}/api/pedido/${orderId}`;

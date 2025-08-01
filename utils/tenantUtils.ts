@@ -1,4 +1,4 @@
-import { SequentialFlowConfig, TenantConfig } from '@/types/menu';
+import { TenantConfig } from '@/types/menu';
 import {
   SpanishCategoriesFlowConfig,
   SpanishSequentialFlowConfig,
@@ -14,15 +14,6 @@ export function isTestingOrder(tenantName: string): boolean {
   const tenantsTesters = ['cheefoodies'];
   // TODO: Obtener desde Firestore attributo del tenant isTest
   return isDev || tenantsTesters.includes(tenantName);
-}
-
-export function isSequentialFlow(config: TenantConfig) {
-  if (!(config as SequentialFlowConfig).steps) {
-    return false;
-  }
-
-  const hasSteps = Object.keys((config as SequentialFlowConfig).steps)?.length > 0;
-  return typeof (config as SequentialFlowConfig).steps === 'object' && hasSteps;
 }
 
 export function isWeekend(): boolean {
@@ -75,11 +66,9 @@ async function fetchConfigFromGist(url: string): Promise<SpanishTenantConfig | n
 }
 
 export async function getTenantConfig(
-  tenantId: string,
   fallbackData: SpanishTenantConfig,
   fetchUrl?: string,
-): Promise<TenantConfig> {
-  if (logModule) console.log('> getTenantConfig for:', tenantId);
+): Promise<Omit<TenantConfig, 'tenantId'>> {
   if (!fetchUrl) {
     if (logModule) console.log('⚠️ Usando configuraciones fallback. No hay fetchUrl');
     return mapConfigSpanishToEnglish(fallbackData);

@@ -2,7 +2,7 @@ import type { CreateOrderProps, OrderData } from '@/types/conversation';
 import { formatPrice } from '@/utils/formatters';
 import { db, Timestamp } from '@/utils/server/firebase';
 import { isTestingOrder } from '@/utils/tenantUtils';
-import { calculateCartTotal, calculateDeliveryTotal } from './cart';
+import { calculateCartTotal, calculateDeliveryTotal } from './cart-handlers';
 
 const logModule = process.env.LOG_CORE_ORDER === 'true';
 
@@ -28,7 +28,7 @@ export const createOrder = ({ tenantInfo, phoneNumber, cart }: CreateOrderProps)
       isTest: isTestingOrder(tenantInfo.name),
       createdAt: Timestamp.now(),
     };
-    if (logModule) console.log('🚀 Objeto orderData:', orderData);
+    if (logModule) console.log('Objeto orderData:', orderData);
 
     return orderData;
   } catch (error) {

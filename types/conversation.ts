@@ -1,33 +1,26 @@
 import { Timestamp } from '@/utils/server/firebase';
-import { Category, MenuItem } from './menu';
+import { FlowType, SequentialSelections, StepHandler } from './menu';
 
-// ***************
-// CONVERSATION
-// ***************
+// ===== CONVERSATION =====
 
-export interface CacheEntry<T> {
-  data: T;
+export interface CacheEntry {
+  data: CartConversation;
   expires: number;
 }
 
 type ConversationStep =
-  | 'welcome' // Step para escoger categoría
-  | 'category_selection' // Step genérico - escoger items de categoría -> first_level_selection
-  | 'item_selection' // Step genérico - escoger items de categoría -> second_level_selection
-  | 'quantity_selection'
+  | 'category_welcome'
   | 'sequential_welcome'
   | 'sequential_step_selection'
-  | 'sequential_quantity_selection'
+  | 'category_selection'
+  | 'item_selection'
+  | 'quantity_selection'
   | 'cart_actions'
   | 'checkout'
   | 'final';
 
-export type AddMoreItemsStep = ConversationStep & ('category_selection' | 'sequential_welcome');
-
-export interface ConversationConfig {
-  tenantId: string;
-  timeoutMinutes: number;
-}
+export type WelcomeConvoStep = ConversationStep & ('category_welcome' | 'sequential_welcome');
+export type RepeatFlowConvoStep = ConversationStep & ('category_selection' | 'sequential_welcome');
 
 export interface BaseConversation {
   key: string;
@@ -35,112 +28,83 @@ export interface BaseConversation {
   lastInteraction: number;
 }
 
-export type StepProps<T extends BaseConversation> = {
-  phoneNumber: string;
-  message: string;
-  conversation: T;
+// Extender BaseConversation para incluir los campos específicos del carrito
+export interface CartConversation extends BaseConversation {
+  cart: CartItem[];
+  // Para flujo de categories
+  selectedCategory?: string;
+  selectedItem?: {
+    name: string;
+    price: number;
+    description?: string;
+  };
+  // Para flujo secuencial
+  sequentialFlow?: {
+    currentStep: number;
+    selections: SequentialSelections;
+    customizedItem?: { name: string; price: number };
+  };
+}
+
+// ===== CONVERSATION MANAGER =====
+
+export type InitialConvo = {
+  step: FlowType;
+  cart: [];
 };
 
-export type StepHandler<T extends BaseConversation> = (Props: StepProps<T>) => Promise<string>;
-
-export interface Conversation<T extends BaseConversation> {
-  config: ConversationConfig;
-  stepHandlers: Record<string, StepHandler<T>>;
+export interface ConvoBaseConfig {
+  tenantId: string;
+  flowType: FlowType;
+  timeoutMinutes: number;
 }
 
-export type InitialConvo<T> = Omit<T, 'key' | 'lastInteraction'>;
-
-export interface ConversationManager<T extends BaseConversation> {
-  getOrCreateConversation: (phoneNumber: string, initialConvo: InitialConvo<T>) => Promise<T>;
-  updateConversation: (phoneNumber: string, updates: Partial<T>) => Promise<void>;
-  clearConversation: (phoneNumber: string) => Promise<void>;
-  hasActiveConversation: (phoneNumber: string) => Promise<boolean>;
-  processMessage: (
-    phoneNumber: string,
-    message: string,
-    getInitialConversation: () => InitialConvo<T>,
-    getWelcomeMessage: () => string,
-  ) => Promise<string>;
-  registerStepHandler: (step: string, handler: StepHandler<T>) => void;
+export interface ConvoConfig extends ConvoBaseConfig {
+  stepHandlers: Record<string, StepHandler>;
 }
 
-// ***************
-// MENU
-// ***************
+export type GetOrCreateConversationFn = (
+  phoneNumber: string,
+  initialStep: WelcomeConvoStep,
+) => Promise<CartConversation>;
+export type UpdateConversationFn = (
+  phoneNumber: string,
+  updates: Partial<CartConversation>,
+) => Promise<void>;
+export type ClearConversationFn = (phoneNumber: string) => Promise<void>;
+export type HasActiveConversationFn = (phoneNumber: string) => Promise<boolean>;
+export type ProcessMessageFn = (
+  phoneNumber: string,
+  message: string,
+  getWelcomeMessage: () => string,
+) => Promise<string>;
+export type RegisterHandlerFn = (step: string, handler: StepHandler) => void;
 
-interface CategorySelectionProps {
-  message: string;
-  categories: Record<string, Category>;
-  welcomeMessageFn: GetWelcomeMessageFn;
-  updateConversationFn: (selectedCategoryKey: string) => Promise<void>;
+export interface ConversationManager {
+  getOrCreateConversation: GetOrCreateConversationFn;
+  updateConversation: UpdateConversationFn;
+  clearConversation: ClearConversationFn;
+  hasActiveConversation: HasActiveConversationFn;
+  processMessage: ProcessMessageFn;
+  registerHandler: RegisterHandlerFn;
 }
 
-export type CategorySelectionPropsFn = (Props: CategorySelectionProps) => Promise<string>;
-
-interface ItemSelectionProps {
-  message: string;
-  category: Category;
-  welcomeMessageFn: GetWelcomeMessageFn;
-  updateConversationFn: (option: number, selectedItem: MenuItem) => Promise<void>;
-}
-
-export type ItemSelectionPropsFn = (Props: ItemSelectionProps) => Promise<string>;
-
-// ***************
-// CART
-// ***************
+// ===== CART =====
 
 export interface CartItem {
   name: string;
   quantity: number;
   price: number;
   category: string;
-  itemIndex: number;
 }
 
-export interface SequentialSelection {
-  stepName: string;
-  selectedItem: {
-    name: string;
-    price: number;
-  };
+export interface ValidateItemReturn {
+  isValid: boolean;
+  name?: string;
+  price?: number;
+  category?: string;
+  error?: string;
 }
-
-// Extender BaseConversation para incluir los campos específicos del carrito
-export interface CartConversation extends BaseConversation {
-  cart: CartItem[];
-  selectedCategory?: string;
-  selectedItem?: string;
-  selectedItemIndex?: number;
-  sequentialFlow?: {
-    currentStep: number;
-    selections: Record<string, SequentialSelection>;
-    customizedItem?: { name: string; price: number } | null;
-  };
-}
-
-interface QuantitySelectionProps {
-  conversation: CartConversation;
-  quantity: number;
-  price: number;
-  deliveryCost: number;
-  updateConversationFn: (updatedCart: CartItem[]) => Promise<void>;
-}
-
-export type QuantitySelectionFn = (Props: QuantitySelectionProps) => Promise<string>;
-
-interface CartActionsProps {
-  conversation: CartConversation;
-  option: number;
-  deliveryCost: number;
-  transfersPhoneNumber: string;
-  updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
-  welcomeMessageFn: GetWelcomeMessageFn;
-  addMoreItemsFn: () => string;
-  addMoreStep: AddMoreItemsStep;
-}
-
-export type CartActionsFn = (Props: CartActionsProps) => Promise<string>;
 
 interface CheckoutMessageProps {
   cart: CartItem[];
@@ -150,29 +114,13 @@ interface CheckoutMessageProps {
 
 export type CheckoutMessageFn = (Props: CheckoutMessageProps) => string;
 
-interface CheckoutProps {
-  conversation: CartConversation;
-  option: number;
-  deliveryCost: number;
-  transfersPhoneNumber: string;
-  updateConversationFn: (updates: Partial<CartConversation>) => Promise<void>;
-  welcomeMessageFn: GetWelcomeMessageFn;
-  addMoreItemsFn: () => string;
-  finalMessageFn: () => Promise<string>;
-  addMoreStep: AddMoreItemsStep;
-}
-
-export type CheckoutFn = (Props: CheckoutProps) => Promise<string>;
-
-// ***************
-// ORDER
-// ***************
-
 export interface TenantInfo {
   name: string;
   transfersPhoneNumber: string;
   deliveryCost: number;
 }
+
+// ===== ORDER =====
 
 export interface CreateOrderProps {
   tenantInfo: TenantInfo;
@@ -195,11 +143,3 @@ export interface OrderData {
   status?: 'pending' | 'confirmed' | 'preparing' | 'delivered' | 'cancelled';
   customerName?: string;
 }
-
-// ***************
-// HANDLERS
-// ***************
-
-export type TenantHandler = StepHandler<CartConversation>;
-
-export type GetWelcomeMessageFn = (msgPreliminar?: string, greeting?: boolean) => string;

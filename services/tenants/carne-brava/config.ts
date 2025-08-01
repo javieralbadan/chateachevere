@@ -1,4 +1,9 @@
-import { CategoriesFlowConfig, SequentialFlowConfig, TenantConfig } from '@/types/menu';
+import {
+  CategoriesConfig,
+  CategoriesFlowConfig,
+  SequentialConfig,
+  SequentialFlowConfig,
+} from '@/types/menu';
 import { getTenantConfig, isWeekend } from '@/utils/tenantUtils';
 import CONFIGURACION_SEMANA from './menu_dia_semana.json';
 import CONFIGURACION_FIN_DE_SEMANA from './menu_fin_de_semana.json';
@@ -17,14 +22,19 @@ const dataSourceMap = {
   },
 };
 
-const dataConfig = isWeekend() ? dataSourceMap.weekend : dataSourceMap.week;
+const dataSource = isWeekend() ? dataSourceMap.weekend : dataSourceMap.week;
+const convoConfig = await getTenantConfig(dataSource.fallbackData, dataSource.gistUrl);
+const tenantConfig = { ...convoConfig, tenantId: 'carne-brava' };
 
-export const TENANT_ID = 'carne-brava';
-export const TENANT_CONFIG: TenantConfig = await getTenantConfig(
-  TENANT_ID,
-  dataConfig.fallbackData,
-  dataConfig.gistUrl,
-);
-export const tenantCategories = (TENANT_CONFIG as CategoriesFlowConfig).categories || {};
-export const tenantSortedSteps =
-  (TENANT_CONFIG as SequentialFlowConfig).steps.sort((a, b) => a.order - b.order) || [];
+let tenantSortedSteps: SequentialConfig = [];
+let tenantCategories: CategoriesConfig = {};
+if (tenantConfig.flowType === 'sequential') {
+  tenantSortedSteps = (tenantConfig as SequentialFlowConfig).steps.sort(
+    (a, b) => a.order - b.order,
+  );
+}
+if (tenantConfig.flowType === 'categories') {
+  tenantCategories = (tenantConfig as CategoriesFlowConfig).categories;
+}
+
+export { tenantCategories, tenantConfig, tenantSortedSteps };

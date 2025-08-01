@@ -1,4 +1,4 @@
-import { CategoriesFlowConfig, TenantConfig } from '@/types/menu';
+import { CategoriesConfig, CategoriesFlowConfig } from '@/types/menu';
 import { SpanishTenantConfig } from '@/types/menu-spanish';
 import { getTenantConfig } from '@/utils/tenantUtils';
 
@@ -39,7 +39,13 @@ export const fallbackData: SpanishTenantConfig = {
   },
 };
 
-export const TENANT_ID = 'cheefoodies';
 // Intentar fetch de configuraciones desde Gist y mapear a inglés
-export const TENANT_CONFIG: TenantConfig = await getTenantConfig(TENANT_ID, fallbackData);
-export const tenantCategories = (TENANT_CONFIG as CategoriesFlowConfig).categories || {};
+const convoConfig = await getTenantConfig(fallbackData);
+const tenantConfig = { ...convoConfig, tenantId: 'cheefoodies' };
+
+let tenantCategories: CategoriesConfig = {};
+if (tenantConfig.flowType === 'categories') {
+  tenantCategories = (tenantConfig as CategoriesFlowConfig).categories;
+}
+
+export { tenantCategories, tenantConfig };

@@ -1,4 +1,10 @@
-import { CategoriesFlowConfig, Category, SequentialFlowConfig, TenantConfig } from '@/types/menu';
+import {
+  CategoriesConfig,
+  CategoriesFlowConfig,
+  SequentialConfig,
+  SequentialFlowConfig,
+  TenantConfig,
+} from '@/types/menu';
 import {
   SpanishCategoriesFlowConfig,
   SpanishSequentialFlowConfig,
@@ -7,7 +13,7 @@ import {
 
 const logModule = process.env.LOG_TENANT_MAPPER === 'true';
 
-// Función para transformar configuración española a inglés
+// Función para transformar configuración español a inglés
 export function mapConfigSpanishToEnglish(spanishConfig: SpanishTenantConfig): TenantConfig {
   if (isSpanishSequentialFlow(spanishConfig)) {
     if (logModule) console.log('Is Spanish Sequential Flow:');
@@ -18,7 +24,7 @@ export function mapConfigSpanishToEnglish(spanishConfig: SpanishTenantConfig): T
   }
 }
 
-// Type guard para config del flujo secuencial en español, implementación similar a isSequentialFlow
+// Type guard para config del flujo secuencial en español
 function isSpanishSequentialFlow(config: SpanishTenantConfig) {
   if (!(config as SpanishSequentialFlowConfig).etapas) {
     return false;
@@ -29,7 +35,7 @@ function isSpanishSequentialFlow(config: SpanishTenantConfig) {
 }
 
 function mapSequentialFlow(spanishConfig: SpanishSequentialFlowConfig) {
-  const transformedSteps = spanishConfig.etapas.map((step) => ({
+  const transformedSteps: SequentialConfig = spanishConfig.etapas.map((step) => ({
     order: step.orden,
     name: step.nombre,
     emoji: step.emoji,
@@ -43,6 +49,7 @@ function mapSequentialFlow(spanishConfig: SpanishSequentialFlowConfig) {
   }));
 
   return {
+    flowType: 'sequential',
     transfersPhoneNumber: spanishConfig.numeroTransferencias,
     deliveryCost: spanishConfig.costoDomicilio,
     initialMessage: spanishConfig.mensajeInicial,
@@ -52,7 +59,7 @@ function mapSequentialFlow(spanishConfig: SpanishSequentialFlowConfig) {
 }
 
 function mapCategoriesFlow(spanishConfig: SpanishCategoriesFlowConfig) {
-  const transformedCategories: Record<string, Category> = {};
+  const transformedCategories: CategoriesConfig = {};
 
   Object.entries(spanishConfig.categorias).forEach(([key, category]) => {
     transformedCategories[key] = {
@@ -69,6 +76,7 @@ function mapCategoriesFlow(spanishConfig: SpanishCategoriesFlowConfig) {
   });
 
   return {
+    flowType: 'categories',
     transfersPhoneNumber: spanishConfig.numeroTransferencias,
     deliveryCost: spanishConfig.costoDomicilio,
     categories: transformedCategories,
