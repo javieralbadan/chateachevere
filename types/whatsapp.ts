@@ -1,19 +1,37 @@
 import { AuthComponentsType, UtilityComponentsType } from './messages';
 
-// TODO: Check how to merge with types/message.ts
-export interface WhatsAppTextMessage {
-  to: string;
-  message: string;
+// ===== HANDLER CLOSURE FACTORY =====
+
+export interface TenantSetup {
+  accessToken: string;
+  handlerKey: string;
+  name: string;
+  phoneNumberId: string;
 }
 
-export interface WhatsAppTemplateMessage {
+interface WhatsAppTextMessage {
+  to: string;
+  message: string;
+  tenantSetup: TenantSetup;
+}
+
+interface WhatsAppTemplateMessage {
   to: string;
   templateName: string;
   components: AuthComponentsType | UtilityComponentsType;
   languageCode?: string;
+  tenantSetup: TenantSetup;
 }
 
-// ********* META API *********
+export type GetResponseFn = (phoneNumber: string, incomingMessage: string) => Promise<string>;
+
+type TextMessageProps = Omit<WhatsAppTextMessage, 'tenantSetup'>;
+export type SendTextMessageFn = (props: TextMessageProps) => Promise<unknown>;
+
+type TemplateMessageProps = Omit<WhatsAppTemplateMessage, 'tenantSetup'>;
+export type SendTemplateMessageFn = (props: TemplateMessageProps) => Promise<unknown>;
+
+// ===== META API =====
 
 interface BaseWhatsAppRequest {
   messaging_product: 'whatsapp';
@@ -39,7 +57,9 @@ export interface WhatsAppTemplateRequest extends BaseWhatsAppRequest {
   };
 }
 
-// ********* META API - WEBHOOK *********
+export type WhatsAppAnyRequest = WhatsAppTextRequest | WhatsAppTemplateRequest;
+
+// ===== META API - WEBHOOK =====
 
 type MessageType =
   | 'text'
@@ -63,7 +83,7 @@ interface MessageMetadata {
 }
 
 // Interface para un mensaje individual
-interface WhatsAppMessage {
+export interface WhatsAppMessage {
   id: string;
   from: string;
   timestamp: string;

@@ -3,6 +3,13 @@ import { FlowType, SequentialSelections, StepHandler } from './menu';
 
 // ===== CONVERSATION =====
 
+export type ConversationHandler = (phoneNumber: string, message: string) => Promise<string>;
+export interface ConversationHandlerModule {
+  clearConvo: (phoneNumber: string) => void | Promise<void>;
+  hasActiveConvo: (phoneNumber: string) => Promise<boolean>;
+  conversationHandler: ConversationHandler;
+}
+
 export interface CacheEntry {
   data: CartConversation;
   expires: number;

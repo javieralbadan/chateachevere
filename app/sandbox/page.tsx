@@ -34,6 +34,18 @@ const getBodyRequest = (phoneNumber: string, inputMessage: string) => ({
           field: 'messages',
           value: {
             messaging_product: 'whatsapp',
+            metadata: {
+              display_phone_number: '573112223344', // <- phoneNumber del tenant
+              phone_number_id: '680140605188339', // <- phoneNumberId del tenant
+            },
+            contacts: [
+              {
+                profile: {
+                  name: 'Javier Albadán',
+                },
+                wa_id: phoneNumber,
+              },
+            ],
             messages: [
               {
                 from: phoneNumber,
