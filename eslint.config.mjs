@@ -18,10 +18,10 @@ const ignores = [
 	'dist/',
 	'node_modules/',
 	'public/',
-	'next.config.js',
-	'postcss.config.js',
-	'prettier.config.js',
-	'tailwind.config.js',
+	'*.config.js',
+	'*.config.ts',
+	'*.config.mjs',
+	'*.config.cjs',
 	'tsconfig.json',
 ];
 

@@ -1,1 +1,2 @@
+#!/bin/sh
 yarn format && yarn lint && yarn typecheck
