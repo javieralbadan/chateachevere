@@ -157,3 +157,9 @@ export function createConversationManager(initialConfig: ConvoBaseConfig): Conve
     registerHandler,
   };
 }
+
+// ===== TESTING HELPERS =====
+
+export function clearLocalCache() {
+  localCache.clear();
+}

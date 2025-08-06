@@ -88,7 +88,7 @@ export type StepHandler = (Props: StepProps) => Promise<string>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CustomMessageFn = (...args: any[]) => string | Promise<string>;
-type CustomMessages = {
+export type CustomMessages = {
   getWelcomeMessage: CustomMessageFn;
   getRepeatFlowMessage: CustomMessageFn;
 };
