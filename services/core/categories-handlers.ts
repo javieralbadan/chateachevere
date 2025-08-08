@@ -64,7 +64,7 @@ export const createCategoriesHandlers = ({ tenantConfig, manager, customMessages
 
     if (logModule) console.log('[itemSelection]:', option, category.name);
 
-    if (option < 1 || option > category.items.length) {
+    if (isNaN(option) || option < 1 || option > category.items.length) {
       return `❌ Opción no válida.\n\n${getItemsSelectionMessage(category)}`;
     }
 

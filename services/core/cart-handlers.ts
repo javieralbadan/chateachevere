@@ -24,7 +24,7 @@ export const createCartHandlers = ({ tenantConfig, manager, conditionalMessages 
     const quantity = parseInt(message.trim(), 10);
 
     // Validar cantidad
-    if (quantity < 1 || quantity > 10) {
+    if (isNaN(quantity) || quantity < 1 || quantity > 10) {
       return '❌ Cantidad no válida. Por favor ingresa un número entre 1 y 10.';
     }
 

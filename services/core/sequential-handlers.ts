@@ -60,7 +60,7 @@ export const createSequentialHandlers = ({ tenantConfig, manager, customMessages
     }
 
     // Validar opción
-    if (option < 1 || option > currentStep.items.length) {
+    if (isNaN(option) || option < 1 || option > currentStep.items.length) {
       return `❌ Opción no válida.\n\n${getSequentialStepMessage(currentStep)}`;
     }
 

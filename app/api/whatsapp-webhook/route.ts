@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
       console.log(`📱 Procesando mensaje para tenant ${tenantSetup.handlerKey} (${phoneNumberId})`);
       if (changes?.field === 'messages') {
         // console.log('[Webhook POST] Full request body:', JSON.stringify(jsonData, null, 2));
-        const result = await processWhatsAppMessage(tenantSetup, changes.value?.messages);
+        const message = changes.value?.messages?.[0];
+        const result = await processWhatsAppMessage(tenantSetup, message);
 
         if (isDev && result) {
           return handleNextSuccessResponse({ success: true, response: result });
@@ -76,36 +77,33 @@ export async function POST(request: NextRequest) {
 
 const processWhatsAppMessage = async (
   tenantSetup: TenantSetup,
-  messages: WhatsAppMessage[] | undefined,
+  message: WhatsAppMessage | undefined,
 ): Promise<string | null> => {
-  if (!messages || messages.length === 0) return null;
+  if (!message) return null;
 
   let sandboxResponse: string | null = null;
+  const phoneNumber = message.from;
+  const incomingMessage = message.text?.body;
 
-  for (const message of messages) {
-    const phoneNumber = message?.from;
-    const incomingMessage = message?.text?.body;
+  if (message.type !== 'text' || !phoneNumber || !incomingMessage) {
+    throw new Error('WhatsAppMessage invalid structure (incoming - Meta webhook)');
+  }
 
-    if (message?.type !== 'text' || !phoneNumber || !incomingMessage) {
-      throw new Error('WhatsAppMessage invalid structure (incoming - Meta webhook)');
+  console.log(`[Webhook POST] From: ${phoneNumber}. Message: "${incomingMessage}"`);
+  try {
+    // Use the closure-based handler
+    const whatsappHandler = createWhatsAppHandler(tenantSetup);
+    const responseMsg = await whatsappHandler.getResponse(phoneNumber, incomingMessage);
+
+    if (isDev) {
+      console.log('📤 Bot Response (DEV):', responseMsg);
+      sandboxResponse = responseMsg;
+    } else {
+      console.log(`✅ Respuesta enviada exitosamente a ${phoneNumber}`);
+      await whatsappHandler.sendTextMessage({ to: phoneNumber, message: responseMsg });
     }
-
-    console.log(`[Webhook POST] From: ${phoneNumber}. Message: "${incomingMessage}"`);
-    try {
-      // Use the closure-based handler
-      const whatsappHandler = createWhatsAppHandler(tenantSetup);
-      const responseMsg = await whatsappHandler.getResponse(phoneNumber, incomingMessage);
-
-      if (isDev) {
-        console.log('📤 Bot Response (DEV):', responseMsg);
-        sandboxResponse = responseMsg;
-      } else {
-        console.log(`✅ Respuesta enviada exitosamente a ${phoneNumber}`);
-        await whatsappHandler.sendTextMessage({ to: phoneNumber, message: responseMsg });
-      }
-    } catch (error) {
-      console.error('Error processando WhatsAppMessage:', error);
-    }
+  } catch (error) {
+    console.error('Error processando WhatsAppMessage:', error);
   }
 
   return sandboxResponse;
