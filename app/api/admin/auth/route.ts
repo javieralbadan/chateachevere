@@ -1,5 +1,6 @@
 import { AdminSession } from '@/types/admin';
 import { db, Timestamp } from '@/utils/server/firebase';
+import { getUnavailableResponse, isFirebaseStaticExport } from '@/utils/server/firebase-check';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface PostBody {
@@ -8,6 +9,10 @@ interface PostBody {
 }
 
 export async function POST(request: NextRequest) {
+  if (isFirebaseStaticExport()) {
+    return getUnavailableResponse();
+  }
+
   try {
     const body = (await request.json()) as unknown;
     const { token, tenantId } = body as PostBody;
@@ -80,6 +85,10 @@ interface DeleteBody {
 
 // Endpoint para cerrar sesión
 export async function DELETE(request: NextRequest) {
+  if (isFirebaseStaticExport()) {
+    return getUnavailableResponse();
+  }
+
   try {
     const body = (await request.json()) as unknown;
     const { token } = body as DeleteBody;

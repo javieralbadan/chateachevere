@@ -13,8 +13,8 @@ export const ServicesSection: React.FC = () => {
       {services.map((service, index) => {
         const isEven = index % 2 === 0;
         const containerClasses = isEven
-          ? 'bg-white text-black'
-          : 'bg-[var(--primary-color)] text-white';
+          ? 'bg-[var(--primary-color)] text-white'
+          : 'bg-white text-black';
 
         return (
           <div key={service.id} id={service.id} className={containerClasses}>

@@ -1,9 +1,9 @@
 'use client';
-import Image from 'next/image';
-import useFetchData from '@/hooks/useFetchData';
-import Loading from '../atoms/Loading';
-import { scrollToSection } from '@/utils/scroll';
 import { HeroBannerType, ServiceType } from '@/data/types';
+import useFetchData from '@/hooks/useFetchData';
+import { scrollToSection } from '@/utils/scroll';
+import Image from 'next/image';
+import Loading from '../atoms/Loading';
 
 export const HeroBanner = () => {
   const { data: services, loading: loadingServices } = useFetchData('servicios');

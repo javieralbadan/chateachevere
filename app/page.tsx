@@ -1,5 +1,6 @@
 import Loading from '@/components/atoms/Loading';
 import { ScrollToTopButton } from '@/components/atoms/ScrollToTopButton';
+import { BrandSection } from '@/components/organisms/BrandSection';
 import { ContactSection } from '@/components/organisms/ContactSection';
 import { Footer } from '@/components/organisms/Footer';
 import { HeroBanner } from '@/components/organisms/HeroBanner';
@@ -12,6 +13,7 @@ export default function Home() {
     <main>
       <Suspense fallback={<Loading />}>
         <HeroBanner />
+        <BrandSection />
         <ServicesSection />
         <TestimonialsSection />
         <ContactSection />

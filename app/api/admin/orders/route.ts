@@ -1,8 +1,13 @@
 import { OrderData } from '@/types/conversation';
 import { db } from '@/utils/server/firebase';
+import { getUnavailableResponse, isFirebaseStaticExport } from '@/utils/server/firebase-check';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
+  if (isFirebaseStaticExport()) {
+    return getUnavailableResponse();
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token') ?? '';
@@ -93,6 +98,10 @@ interface PatchBody {
 
 // Actualizar status de una orden
 export async function PATCH(request: NextRequest) {
+  if (isFirebaseStaticExport()) {
+    return getUnavailableResponse();
+  }
+
   try {
     const body = (await request.json()) as unknown;
     const { token, tenantId, orderId, status } = body as PatchBody;

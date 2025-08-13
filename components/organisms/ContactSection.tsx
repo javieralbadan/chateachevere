@@ -13,7 +13,7 @@ export const ContactSection = () => {
     <section id="contact" className="section-padding bg-white">
       <div className="container mx-auto text-center">
         <h2 className="text-5xl sm:text-6xl md:text-7xl text-primary-color mb-6">
-          Información de Contacto
+          Contactar agente de ventas
         </h2>
 
         <div className="flex flex-col md:flex-row">

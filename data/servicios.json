@@ -1,35 +1,34 @@
 [
   {
-    "id": "chats-automaticos",
-    "name": "Cuenta genérica de WS",
-    "description": "Toma pedidos, ofrece tus productos y sevicios con conversaciones automatizadas",
-    "images": ["/imgs/servicios/logo-frontal-unsplash.jpg", "/imgs/servicios/logo-black-background-unsplash.jpg", "/imgs/servicios/logo-3d-unsplash.jpg"],
+    "id": "plan-basico",
+    "name": "Plan Básico – Empieza sin complicarte",
+    "description": "Configura tu chatbot una sola vez y deja que atienda por ti. Ideal si tus menús, productos o servicios cambian poco. Sin dolores de cabeza, sin paneles complejos: listo para funcionar desde el día uno. Perfecto para negocios que no necesitan más de un cambio al mes.",
+    "images": ["/imgs/servicios/chats-waiting-unsplash.jpg", "/imgs/servicios/applogo-in-phone-unsplash.jpg", "/imgs/servicios/logo-3d-unsplash.jpg"],
     "price": "$12.500",
-    "whatsappText": "Hola, quiero averiguar por la automatización de whatsapp"
+    "whatsappText": "Hola, quiero averiguar por el Plan Básico de automatización de WhatsApp"
   },
   {
-    "id": "optimiza-tiempos",
-    "name": "Tu propia cuenta de WS",
-    "description": "Elimina largas esperas o multiples chats para atender mientras tus clientes hacen sus elecciones",
-    "images": ["/imgs/servicios/chats-list-unsplash.jpg", "/imgs/servicios/chats-waiting-unsplash.jpg", "/imgs/servicios/empty-chat-unsplash.jpg"],
-    "price": "$12.500",
-    "whatsappText": "Hola, quiero averiguar por la automatización de whatsapp"
+    "id": "plan-flexible",
+    "name": "Plan Flexible – Ajusta cuando quieras",
+    "description": "Recibe un panel de edición sencillo para cambiar lo que tus clientes ven en WhatsApp: menús, precios, promociones… todo en un par de clics. Perfecto para restaurantes, tiendas y servicios que se actualizan a diario.",
+    "images": ["/imgs/servicios/chats-list-unsplash.jpg", "/imgs/servicios/empty-chat-unsplash.jpg", "/imgs/servicios/logo-frontal-unsplash.jpg"],
+    "price": "$16.900",
+    "whatsappText": "Hola, quiero averiguar por el Plan Flexible de automatización de WhatsApp"
   },
   {
-    "id": "aumenta-ganancias",
-    "name": "Aumenta ganancias",
-    "description": "Reduce tiempos para la primera atención a tus clientes, mientras se piensa y se elige, tendrás tiempo para enfocarte de lleno en tu negocio. Retén más a tus clientes, atrae nuevos y genera más ventas",
+    "id": "plan-pro",
+    "name": "Plan Pro – Control total y datos en tus manos",
+    "description": "Además de poder editar tu flujo, accede a un panel con estadísticas: cuántos pedidos llegaron, qué productos son más populares y cómo mejorar tu atención. Ideal para crecer con datos reales y tomar decisiones más inteligentes.",
     "images": ["/imgs/servicios/calculadora-unsplash.jpg", "/imgs/servicios/colombian-pesos.jpg", "/imgs/servicios/monedas-unsplash.jpg"],
-    "price": "$12.500",
-    "whatsappText": "Hola, quiero averiguar por la automatización de whatsapp"
+    "price": "$23.900",
+    "whatsappText": "Hola, quiero averiguar por el Plan Pro de automatización de WhatsApp"
   },
   {
-    "id": "atrae-mas-clientes",
-    "name": "Atrae más clientes",
-    "description": "Entrega y obtén información más precisa y haz que tus clientes retornen y corran la voz",
-    "images": ["/imgs/servicios/applogo-in-phone-unsplash.jpg", "/imgs/servicios/man-chatting-unsplash.jpg", "/imgs/servicios/person-chatting-unsplash.jpg"],
-    "price": "$12.500",
-    "whatsappText": "Hola, quiero averiguar por la automatización de whatsapp"
+    "id": "plan-premium",
+    "name": "Plan Premium – A tu medida",
+    "description": "Automatización personalizada al 100%: mensajes en varios idiomas, plantillas únicas, integraciones especiales y lo que tu negocio necesite para destacarse. Aquí no hay límites, diseñamos la experiencia perfecta para tus clientes.",
+    "images": ["/imgs/servicios/logo-black-background-unsplash.jpg", "/imgs/servicios/man-chatting-unsplash.jpg", "/imgs/servicios/person-chatting-unsplash.jpg"],
+    "price": "Desde $36.500",
+    "whatsappText": "Hola, quiero averiguar por el Plan Premium de automatización de WhatsApp"
   }
 ]
-  

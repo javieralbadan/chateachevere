@@ -15,22 +15,24 @@ export const ServiceContent = ({ service, isEven }: Props) => {
   const { data: contactInfo } = useFetchData('contacto');
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto min-h-[100vh] flex flex-col items-center justify-center">
       {/* <div className="w-full lg:w-1/2 h-64 lg:h-full"> */}
-      <MobileCarousel images={service.images} serviceName={service.name} />
-      <DesktopGridGallery images={service.images} serviceName={service.name} />
+      <div className="hidden">
+        <MobileCarousel images={service.images} serviceName={service.name} />
+        <DesktopGridGallery images={service.images} serviceName={service.name} />
+      </div>
 
-      <div className="flex flex-col w-full container mx-auto justify-center text-center p-6 md:p-12 space-y-4 md:space-y-6">
-        <h2 className="text-5xl sm:text-6xl md:text-7xl">{service.name}</h2>
-        <p className="text-base md:text-lg leading-relaxed">{service.description}</p>
+      <h2 className="text-5xl sm:text-6xl md:text-7xl text-center mt-6 md:mt-8">{service.name}</h2>
+      <div className="flex flex-col w-full md:max-w-[800px] container mx-auto justify-center text-center p-6 md:p-12 space-y-4 md:space-y-6">
+        <p className="text-lg md:text-xl">{service.description}</p>
 
-        <div className="font-semibold text-lg">
+        <div className="font-semibold text-xl sm:text-2xl md:text-3xl">
           {typeof service.price === 'string'
             ? service.price
             : Array.isArray(service.price)
               ? service.price.map((tier, i) => (
                   <div key={i} className="mb-1">
-                    {tier.quantitySessions}: {tier.price}
+                    {tier.quantitySessions}: {tier.price} x mes
                   </div>
                 ))
               : ''}
@@ -43,9 +45,9 @@ export const ServiceContent = ({ service, isEven }: Props) => {
           <div className="pt-4">
             <WhatsappButton
               message={service.whatsappText}
-              buttonText="Quiero chatear chevere"
+              buttonText="Quiero este plan"
               phone={contactInfo.whatsapp}
-              variant={isEven ? 'primary' : 'inverted'}
+              variant={isEven ? 'inverted' : 'primary'}
             />
           </div>
         )}
