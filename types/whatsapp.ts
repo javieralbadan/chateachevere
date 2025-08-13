@@ -4,7 +4,9 @@ import { AuthComponentsType, UtilityComponentsType } from './messages';
 
 export interface TenantSetup {
   accessToken: string;
+  adminPhones: string[];
   handlerKey: string;
+  isActive: boolean;
   name: string;
   phoneNumberId: string;
 }

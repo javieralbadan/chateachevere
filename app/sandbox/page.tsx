@@ -69,7 +69,7 @@ const ChatbotTester: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const testPhoneNumber = '573112223344'; // Número de prueba para simular la conversación
+  const testPhoneNumber = '573118551830'; // Número de prueba para simular la conversación
   const sendMessage = async () => {
     if (!inputMessage.trim()) return;
     // 3. Agregar la respuesta del bot al historial
