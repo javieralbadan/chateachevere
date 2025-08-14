@@ -18,7 +18,7 @@ export const sequentialWelcomeMessage = (msgPreliminar = '') => {
   if (logModule) console.log('🗂️ Manejo de bienvenida Flujo secuencial');
   const config = tenantConfig as SequentialFlowConfig;
   let message = msgPreliminar ? `${msgPreliminar}\n\n` : '';
-  message += `🐂 Bienvenido a Carne Brava. ${config.initialMessage}\n\n`;
+  message += `🐂 Bienvenidos a Carne Brava. ${config.initialMessage}\n\n`;
   message += `${stepsListString}\n`;
   if (logModule) console.log('👋🏼 config.footerInfo', config.footerInfo);
   if (config.footerInfo) message += `\n${config.footerInfo}\n`;
@@ -39,7 +39,7 @@ export const repeatSequentialFlowMessage = () => {
 export const welcomeCategoriesMessage: GetWelcomeMessageFn = (msgPreliminar = '') => {
   if (logModule) console.log('🗂️ Manejo de bienvenida Flujo por categorías');
   let message = msgPreliminar ? `${msgPreliminar}\n\n` : '';
-  message += '🐂 Bienvenido a Carne Brava, ¿qué deseas pedir?\n\n';
+  message += '🐂 Bienvenidos a Carne Brava, ¿qué deseas pedir?\n\n';
   message += `${categoriesListString}\n\n`;
   message += `*Elige un número (1-${categoriesKeys.length})*`;
   return message;

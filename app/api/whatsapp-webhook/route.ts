@@ -84,6 +84,15 @@ const processWhatsAppMessage = async (
   try {
     // Use the closure-based handler
     const whatsappHandler = createWhatsAppHandler(tenantSetup);
+
+    // [Solo en producción] enviar respuesta inmediata primero
+    if (!isDev) {
+      await whatsappHandler.sendTextMessage({
+        to: phoneNumber,
+        message: '⏳ Procesando tu mensaje...',
+      });
+    }
+
     const responseMsg = await whatsappHandler.getResponse(phoneNumber, incomingMessage);
 
     if (isDev) {

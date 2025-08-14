@@ -1,35 +1,30 @@
 export const getInitialWelcomeMessage = () => {
-  return `🤖 *Bienvenido a La Tiendita Chévere* 👋🏼
+  return `🤖 *Te damos la bienvenida a La Tiendita Chévere*
 
-Puedes iniciar diferentes flujos de conversación con estas palabras:
+Prueba nuestros ejemplos de conversaciones:
 
-🐂 *"brava"* - Carne Brava
-   • Flujo por categorías (fines de semana)
-   • Flujo secuencial personalizado (entre semana)
+🐂 *"brava"* - Demo restaurante
+🍽️ *"domicilios"* - Demo domicilios
 
-🍽️ *"domicilios"* - Cheefoodies
-   • Selección de comida por categorías
-   • Sistema de delivery
+_¡Experimenta y descubre cómo un chatbot puede revolucionar tu negocio!_ 🚀
 
-💡 *Comandos especiales:*
-   • "reiniciar" - Reinicia todas las conversaciones
-   • "ayuda" - Muestra este menú
-
-*Responde con una de las palabras para comenzar* ⬇️`;
+_Escribe "ayuda" para más opciones_ 💡`;
 };
 
 export const getHelpMessage = () => {
   return `ℹ️ *Ayuda - Opciones Disponibles*
 
-🎯 *Para iniciar un flujo:*
-   • Escribe "brava" para Carne Brava
-   • Escribe "domicilios" para Cheefoodies
+🐂 *"brava"*
+   • Flujo por categorías (fines de semana)
+   • Flujo secuencial personalizado (entre semana)
 
-🔄 *Para reiniciar:*
-   • Escribe "reiniciar" para limpiar conversaciones
+🍽️ *"domicilios"*
+   • Selección de comida por categorías
+   • Sistema de domicilios
 
-❓ *Para ver ayuda:*
-   • Escribe "ayuda" para mostrar este menú
+💡 *Comandos especiales:*
+   • "reiniciar" - Reinicia todas las conversaciones
+   • "ayuda" - Muestra las opciones disponibles
 
-*¿Con qué flujo quieres comenzar?*`;
+*Escribe cualquiera de estas opciones para continuar* ⬇️`;
 };

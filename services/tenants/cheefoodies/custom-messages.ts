@@ -17,7 +17,7 @@ export const getWelcomeMessage: GetWelcomeMessageFn = (msgPreliminar = '') => {
   if (logModule) console.log('👋🏼 getWelcomeMessage');
   let message = msgPreliminar ? `${msgPreliminar}\n\n` : '';
   // prettier-ignore
-  message += '🍽️ Bienvenido a CheFoodie\'s, ¿qué deseas pedir?\n\n';
+  message += '🍽️ Te damos la bienvenida a CheFoodie\'s, ¿qué deseas pedir?\n\n';
   message += `${categoriesListString}\n\n`;
   message += `*Elige un número (1-${categoriesKeys.length})*`;
   return message;

@@ -2,11 +2,10 @@ import { TenantSetup } from '@/types/whatsapp';
 import { generateSecureToken } from '@/utils/server/crypto';
 import { db, Timestamp } from '@/utils/server/firebase';
 
-const ADMIN_BASE_URL = 'https://chateachevere.web.app';
+const ADMIN_BASE_URL = 'https://chatea-chevere.vercel.app';
 const HOURS_24 = 24 * 60 * 60 * 1000;
 const ACCESS_MSG = `🔐 *Acceso Autorizado*
-Haz clic en el enlace para acceder al panel de administración:
-`;
+Haz clic en el enlace para acceder al panel de administración:\n\n`;
 
 export const handleAdminCommand = async (phoneNumber: string): Promise<string> => {
   const allowedTenants = await checkAdminPermissions(phoneNumber);
@@ -21,17 +20,17 @@ export const handleAdminCommand = async (phoneNumber: string): Promise<string> =
     // Solo un tenant, generar link directo
     const tenantId = allowedTenants[0];
     const sessionToken = await createAdminSession(phoneNumber, tenantId);
-    message += `${ADMIN_BASE_URL}/admin/${tenantId}?token=${sessionToken}`;
+    message += `${ADMIN_BASE_URL}/admin/${tenantId}?token=${sessionToken}\n`;
     return message;
   }
 
   // Múltiples tenants, mostrar opciones
   for (const tenantId of allowedTenants) {
     const sessionToken = await createAdminSession(phoneNumber, tenantId);
-    message += `• *${tenantId.toUpperCase()}*: ${ADMIN_BASE_URL}/admin/${tenantId}?token=${sessionToken}`;
+    message += `• *${tenantId.toUpperCase()}*: ${ADMIN_BASE_URL}/admin/${tenantId}?token=${sessionToken}\n`;
   }
 
-  message += '\n\n⚠️ Por seguridad, todo enlace expira en 24 horas';
+  message += '\n⚠️ Por seguridad, todo enlace expira en 24 horas';
   return message;
 };
 
