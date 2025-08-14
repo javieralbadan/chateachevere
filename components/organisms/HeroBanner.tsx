@@ -2,7 +2,6 @@
 import { HeroBannerType, ServiceType } from '@/data/types';
 import useFetchData from '@/hooks/useFetchData';
 import { scrollToSection } from '@/utils/scroll';
-import Image from 'next/image';
 import Loading from '../atoms/Loading';
 
 export const HeroBanner = () => {
@@ -49,15 +48,9 @@ const ServicesSection = ({ services }: { services: ServiceType[] }) => (
         onClick={() => scrollToSection(servicio.id)}
         className="relative group overflow-hidden cursor-pointer"
       >
-        <Image
-          src={servicio.images[0]}
-          alt={servicio.name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-40 transition-opacity duration-300 group-hover:bg-opacity-20" />
+        <div className="absolute inset-0 bg-black bg-opacity-90 transition-opacity duration-300 group-hover:bg-primary-color" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl text-white bg-black bg-opacity-50 px-4 py-2 rounded text-center">
+          <span className="text-2xl text-white bg-black bg-opacity-90 px-6 py-4 mx-2 rounded text-center">
             {servicio.name}
           </span>
         </div>

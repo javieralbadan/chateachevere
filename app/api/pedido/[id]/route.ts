@@ -1,13 +1,8 @@
 import { generateOrderSummary, getOrderById } from '@/services/core/order';
 import { handleNextErrorResponse } from '@/utils/mappers/nextResponse';
-import { getUnavailableResponse, isFirebaseStaticExport } from '@/utils/server/firebase-check';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id?: string }> }) {
-  if (isFirebaseStaticExport()) {
-    return getUnavailableResponse();
-  }
-
   const { id: orderId } = await params;
   if (!orderId) {
     return handleNextErrorResponse('ID del pedido vacío', 400);

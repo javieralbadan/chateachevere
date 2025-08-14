@@ -14,7 +14,7 @@ async function fetchWithFallback<T extends ValidEndpoint>(
   endpoint: T,
 ): Promise<EndpointDataMap[T]> {
   try {
-    const response = await fetch(DATA_SOURCE_MAP[endpoint], { cache: 'force-cache' });
+    const response = await fetch(DATA_SOURCE_MAP[endpoint], { cache: 'no-cache' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const rawData = (await response.json()) as EndpointDataMap[T];

@@ -2,7 +2,6 @@ import { getTenantSetupFromDB } from '@/services/core/tenant';
 import { createWhatsAppHandler } from '@/services/core/whatsapp-handler';
 import { TenantSetup, WhatsAppMessage, WhatsAppWebhookBody } from '@/types/whatsapp';
 import { handleNextSuccessResponse } from '@/utils/mappers/nextResponse';
-import { getUnavailableResponse, isFirebaseStaticExport } from '@/utils/server/firebase-check';
 import { NextRequest, NextResponse } from 'next/server';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -11,10 +10,6 @@ const STATUS_CODE = { status: 200 }; // Always response status: 200 to Meta Clou
 
 // Verificación del webhook - Meta realiza request GET al Callback URL
 export function GET(request: NextRequest) {
-  if (isFirebaseStaticExport()) {
-    return getUnavailableResponse();
-  }
-
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get('hub.mode');
   const token = searchParams.get('hub.verify_token');
@@ -30,10 +25,6 @@ export function GET(request: NextRequest) {
 
 // Manejo de mensajes entrantes (POST)
 export async function POST(request: NextRequest) {
-  if (isFirebaseStaticExport()) {
-    return getUnavailableResponse();
-  }
-
   try {
     const jsonData: unknown = await request.json();
     const body = jsonData as WhatsAppWebhookBody;
