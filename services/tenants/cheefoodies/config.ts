@@ -4,7 +4,7 @@ import { getTenantConfig } from '@/utils/tenantUtils';
 
 // Configuración del menú - Fuente única de verdad
 export const fallbackData: SpanishTenantConfig = {
-  numeroTransferencias: '573112112565', // Número en formato: código país + número
+  numeroTransferencias: '573115180431', // Número en formato: código país + número
   costoDomicilio: 2000, // En pesos, $2.000 por domicilio
   categorias: {
     desayunos: {

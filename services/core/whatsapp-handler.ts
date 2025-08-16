@@ -4,14 +4,14 @@ import {
   SendTemplateMessageFn,
   SendTextMessageFn,
   TenantSetup,
-  WhatsAppAnyRequest,
   WhatsAppTemplateRequest,
   WhatsAppTextRequest,
 } from '@/types/whatsapp';
 import { formatPhoneNumber } from '@/utils/formatters';
+import { sendMessage } from './whatsapp-sender';
 
 const logModule = process.env.LOG_CORE_WS_HANDLER === 'true';
-const WHATSAPP_API_URL = process.env.WHATSAPP_API_URL;
+
 // Lazy loading map for conversation handlers
 const handlerImports = {
   'carne-brava': () => import('@/services/tenants/carne-brava/conversation-handler'),
@@ -51,10 +51,6 @@ export const createWhatsAppHandler = (tenantSetup: TenantSetup) => {
   if (!phoneNumberId || !accessToken || !handlerKey) {
     const errorMsg = !phoneNumberId ? 'phoneNumberId' : !accessToken ? 'accessToken' : 'handlerKey';
     throw new Error(`TenantSetup incompleto: falta ${errorMsg}`);
-  }
-
-  if (!process.env.WHATSAPP_API_URL) {
-    throw new Error('WHATSAPP_API_URL no configurada');
   }
 
   const isProxyTenant = tenantSetup.handlerKey === 'chatea-chevere';
@@ -105,39 +101,6 @@ export const createWhatsAppHandler = (tenantSetup: TenantSetup) => {
     }
   };
 
-  // Private send message function with closure over tenantSetup
-  const sendMessage = async (bodyRequest: WhatsAppAnyRequest, to: string) => {
-    const formattedPhone = formatPhoneNumber(to);
-    if (logModule) console.log(`➡️ [${phoneNumberId}] Enviando WhatsApp a ${formattedPhone}`);
-
-    try {
-      const response = await fetch(`${WHATSAPP_API_URL}/${phoneNumberId}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(bodyRequest),
-      });
-
-      const result: unknown = await response.json();
-
-      if (!response.ok) {
-        const { error } = result as { error?: { message: string } };
-        const errorMessage =
-          typeof error === 'string' ? error : error?.message || 'Error al enviar el mensaje';
-        console.error(errorMessage);
-        throw new Error(errorMessage);
-      }
-
-      if (logModule) console.log(`✅ [${phoneNumberId}] WhatsApp enviado a ${formattedPhone}`);
-      return result;
-    } catch (error) {
-      console.error(`❌ [${phoneNumberId}] Error enviando mensaje de WhatsApp:`, error);
-      throw error;
-    }
-  };
-
   // Send text message handler with proxy support
   const sendTextMessage: SendTextMessageFn = async ({ to, message }) => {
     if (logModule) console.log(`📧 Enviando mensaje de texto ${message}`);
@@ -153,7 +116,7 @@ export const createWhatsAppHandler = (tenantSetup: TenantSetup) => {
       },
     };
 
-    return sendMessage(bodyRequest, to);
+    return sendMessage({ phoneNumberId, accessToken, bodyRequest });
   };
 
   // Send template message handler
@@ -177,7 +140,7 @@ export const createWhatsAppHandler = (tenantSetup: TenantSetup) => {
       },
     };
 
-    return sendMessage(bodyRequest, to);
+    return sendMessage({ phoneNumberId, accessToken, bodyRequest });
   };
 
   return {

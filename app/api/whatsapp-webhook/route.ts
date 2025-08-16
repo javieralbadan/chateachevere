@@ -1,6 +1,6 @@
 import { getTenantSetupFromDB } from '@/services/core/tenant';
 import { createWhatsAppHandler } from '@/services/core/whatsapp-handler';
-import { TenantSetup, WhatsAppMessage, WhatsAppWebhookBody } from '@/types/whatsapp';
+import { ProcessMsgFn, WhatsAppWebhookBody } from '@/types/whatsapp';
 import { handleNextSuccessResponse } from '@/utils/mappers/nextResponse';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -25,38 +25,36 @@ export function GET(request: NextRequest) {
 
 // Manejo de mensajes entrantes (POST)
 export async function POST(request: NextRequest) {
+  const jsonData: unknown = await request.json();
+  const body = jsonData as WhatsAppWebhookBody;
+
+  if (body.object !== 'whatsapp_business_account') {
+    return new NextResponse('Webhook processed - body.object not WB account', STATUS_CODE);
+  }
+
+  const changes = body.entry?.[0]?.changes?.[0];
+  const isFieldMessages = changes?.field === 'messages';
+  const message = changes.value?.messages?.[0];
+  const phoneNumberId = changes.value?.metadata?.phone_number_id;
+
+  if (!isFieldMessages || !message || !phoneNumberId) {
+    console.error('❌ WhatsApp message invalid structure (incoming - Meta webhook)');
+    return new NextResponse('Webhook processed - invalid structure', STATUS_CODE);
+  }
+
   try {
-    const jsonData: unknown = await request.json();
-    const body = jsonData as WhatsAppWebhookBody;
+    // Obtener configuración del tenant basada en phone_number_id
+    const tenantSetup = await getTenantSetupFromDB('phoneNumberId', phoneNumberId);
+    if (!tenantSetup) {
+      console.error(`❌ Tenant no encontrado para phone_number_id: ${phoneNumberId}`);
+      return new NextResponse('Webhook processed - Tenant not found', STATUS_CODE);
+    }
 
-    if (body.object === 'whatsapp_business_account') {
-      const changes = body.entry?.[0]?.changes?.[0];
-
-      // Extraer phone_number_id del payload
-      const phoneNumberId = changes.value?.metadata?.phone_number_id;
-
-      if (!phoneNumberId) {
-        console.error('❌ phone_number_id no encontrado en el payload');
-        return new NextResponse('Webhook processed - Missing phone_number_id', STATUS_CODE);
-      }
-
-      // Obtener configuración del tenant basada en phone_number_id
-      const tenantSetup = await getTenantSetupFromDB('phoneNumberId', phoneNumberId);
-      if (!tenantSetup) {
-        console.error(`❌ Tenant no encontrado para phone_number_id: ${phoneNumberId}`);
-        return new NextResponse('Webhook processed - Tenant not found', STATUS_CODE);
-      }
-
-      console.log(`📱 Procesando mensaje para tenant ${tenantSetup.handlerKey} (${phoneNumberId})`);
-      if (changes?.field === 'messages') {
-        // console.log('[Webhook POST] Full request body:', JSON.stringify(jsonData, null, 2));
-        const message = changes.value?.messages?.[0];
-        const result = await processWhatsAppMessage(tenantSetup, message);
-
-        if (isDev && result) {
-          return handleNextSuccessResponse({ success: true, response: result });
-        }
-      }
+    // console.log('[Webhook POST] Full request body:', JSON.stringify(jsonData, null, 2));
+    const result = await processWhatsAppMessage(tenantSetup, message);
+    if (isDev && result) {
+      // Solo en dev retornar el mensaje de respuesta (result) para el sandbox
+      return handleNextSuccessResponse({ success: true, response: result });
     }
 
     return new NextResponse('Webhook received', STATUS_CODE);
@@ -66,33 +64,19 @@ export async function POST(request: NextRequest) {
   }
 }
 
-const processWhatsAppMessage = async (
-  tenantSetup: TenantSetup,
-  message: WhatsAppMessage | undefined,
-): Promise<string | null> => {
-  if (!message) return null;
-
+const processWhatsAppMessage: ProcessMsgFn = async (tenantSetup, message) => {
   let sandboxResponse: string | null = null;
   const phoneNumber = message.from;
   const incomingMessage = message.text?.body;
 
   if (message.type !== 'text' || !phoneNumber || !incomingMessage) {
-    throw new Error('WhatsAppMessage invalid structure (incoming - Meta webhook)');
+    throw new Error('WhatsApp message invalid structure (incoming - Meta webhook)');
   }
 
-  console.log(`[Webhook POST] From: ${phoneNumber}. Message: "${incomingMessage}"`);
+  console.log(`[Webhook POST] From: ${phoneNumber} (${tenantSetup.name}): "${incomingMessage}"`);
   try {
     // Use the closure-based handler
     const whatsappHandler = createWhatsAppHandler(tenantSetup);
-
-    // [Solo en producción] enviar respuesta inmediata primero
-    if (!isDev) {
-      await whatsappHandler.sendTextMessage({
-        to: phoneNumber,
-        message: '⏳ Procesando tu mensaje...',
-      });
-    }
-
     const responseMsg = await whatsappHandler.getResponse(phoneNumber, incomingMessage);
 
     if (isDev) {
@@ -103,7 +87,7 @@ const processWhatsAppMessage = async (
       await whatsappHandler.sendTextMessage({ to: phoneNumber, message: responseMsg });
     }
   } catch (error) {
-    console.error('Error processando WhatsAppMessage:', error);
+    console.error('Error processando WhatsApp message:', error);
   }
 
   return sandboxResponse;

@@ -9,6 +9,10 @@ interface SendTypingDotsProps {
 export const sendTypingDots = async ({ phoneNumberId, to, accessToken }: SendTypingDotsProps) => {
   if (!to) return;
 
+  if (!process.env.WHATSAPP_API_URL) {
+    throw new Error('WHATSAPP_API_URL no configurada');
+  }
+
   const response = await fetch(`${WHATSAPP_API_URL}/${phoneNumberId}/messages`, {
     method: 'POST',
     headers: {

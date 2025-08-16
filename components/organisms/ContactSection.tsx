@@ -1,6 +1,6 @@
 'use client';
 import useFetchData from '@/hooks/useFetchData';
-import { FiClock, FiMapPin, FiPhone } from 'react-icons/fi';
+import { FiPhone } from 'react-icons/fi';
 import Loading from '../atoms/Loading';
 import { WhatsappButton } from '../molecules/WhatsappButton';
 
@@ -29,22 +29,6 @@ export const ContactSection = () => {
                   >
                     {contactInfo.phone}
                   </a>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center md:justify-start mb-4">
-                <FiClock className="text-primary-color text-xl mr-5" />
-                <div className="md:text-left">
-                  <p className="font-medium">Horario:</p>
-                  <p className="text-light">{contactInfo.schedule}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center md:justify-start mb-4">
-                <FiMapPin className="text-primary-color text-xl mr-5" />
-                <div className="md:text-left">
-                  <p className="font-medium">Cobertura:</p>
-                  <p className="text-light">{contactInfo.coverage}</p>
                 </div>
               </div>
 

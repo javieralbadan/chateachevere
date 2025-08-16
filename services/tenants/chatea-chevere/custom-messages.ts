@@ -12,7 +12,7 @@ _Escribe "ayuda" para más opciones_ 💡`;
 };
 
 export const getHelpMessage = () => {
-  return `ℹ️ *Ayuda - Opciones Disponibles*
+  return `ℹ️ *Ayuda - Comandos Disponibles*
 
 🐂 *"brava"*
    • Flujo por categorías (fines de semana)
@@ -22,9 +22,9 @@ export const getHelpMessage = () => {
    • Selección de comida por categorías
    • Sistema de domicilios
 
-💡 *Comandos especiales:*
-   • "reiniciar" - Reinicia todas las conversaciones
-   • "ayuda" - Muestra las opciones disponibles
+💡 Comandos especiales:
+   • *"reiniciar"* - Reinicia todas las conversaciones
+   • *"ayuda"* - Muestra estos comandos
 
-*Escribe cualquiera de estas opciones para continuar* ⬇️`;
+*Escribe un comando para continuar*`;
 };

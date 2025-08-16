@@ -98,6 +98,11 @@ export interface WhatsAppMessage {
   document?: { id: string; mime_type: string; sha256: string; filename: string };
 }
 
+export type ProcessMsgFn = (
+  tenantSetup: TenantSetup,
+  message: WhatsAppMessage,
+) => Promise<string | null>;
+
 // Interface para el valor del cambio
 interface ChangeValue {
   messaging_product: 'whatsapp';
