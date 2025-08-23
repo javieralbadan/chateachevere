@@ -3,7 +3,6 @@ import {
   ClockCircleOutlined,
   CommentOutlined,
   DollarOutlined,
-  GiftOutlined,
   RobotOutlined,
   SendOutlined,
 } from '@ant-design/icons';
@@ -17,7 +16,7 @@ export const BrandSection: React.FC = () => {
     <div className="w-full bg-white">
       <section className="container mx-auto w-full py-12 sm:py-16 text-center">
         <h3 className="relative z-20 text-5xl sm:text-6xl text-primary-color -mb-5">
-          Casos de Éxito
+          Beneficios de automatizar el whatsapp®
         </h3>
 
         <div className="relative inline-block mx-auto z-10">
@@ -31,7 +30,7 @@ export const BrandSection: React.FC = () => {
         </div>
 
         <h3 className="relative z-20 text-3xl sm:text-4xl mt-4">
-          Lo que tu negocio puede lograr...
+          Lo que tu negocio puede lograr con un chatbot...
         </h3>
 
         <ul className="mt-8 mb-4 max-w-4xl mx-auto space-y-6 text-left">
@@ -68,13 +67,6 @@ export const BrandSection: React.FC = () => {
             <SendOutlined className="text-2xl text-primary-color mt-1 flex-shrink-0" />
             <span className="text-xl text-dark">
               <b>Sin topes de mensajes</b>, todos nuestros planes incluyen mensajes ilimitados
-            </span>
-          </li>
-
-          <li className="flex items-start gap-4 px-4">
-            <GiftOutlined className="text-2xl text-primary-color mt-1 flex-shrink-0" />
-            <span className="text-xl text-dark">
-              <b>Oferta de temporada:</b> Ahorra el costo de la instalación inicial
             </span>
           </li>
         </ul>
