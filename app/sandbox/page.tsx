@@ -114,7 +114,7 @@ const ChatbotTester: React.FC = () => {
   };
 
   return (
-    <Card title="Chatbot Test" className="w-[400px] my-8 mx-auto">
+    <Card title="Chatbot Test" className="w-[400px] my-8 mx-auto bg-gray-400">
       <div className="h-[500px] overflow-y-scroll py-2 scrollbar-hide">
         <List
           dataSource={messages}

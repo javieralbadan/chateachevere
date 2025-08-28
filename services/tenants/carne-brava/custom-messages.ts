@@ -9,7 +9,7 @@ const categoriesKeys = Object.keys(tenantCategories || {});
 const categoriesListString = categoriesKeys
   .map((key, index) => {
     const category = tenantCategories[key];
-    return `${numberToEmoji(index + 1)} ${category.name.split(' ')[0]}`;
+    return `${numberToEmoji(index + 1)} ${category.name}`;
   })
   .join('\n');
 

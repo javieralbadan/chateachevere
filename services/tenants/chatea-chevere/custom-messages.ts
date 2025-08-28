@@ -1,10 +1,11 @@
 export const getInitialWelcomeMessage = () => {
-  return `🤖 *Te damos la bienvenida a La Tiendita Chévere*
+  return `🤖 *Te damos la bienvenida a Chatea Chévere*
 
 Prueba nuestros ejemplos de conversaciones:
 
 🐂 *"brava"* - Demo restaurante
 🍽️ *"domicilios"* - Demo domicilios
+🆕 *"prietos"* - Demo Don Prietos
 
 _¡Experimenta y descubre cómo un chatbot puede revolucionar tu negocio!_ 🚀
 
@@ -21,6 +22,10 @@ export const getHelpMessage = () => {
 🍽️ *"domicilios"*
    • Selección de comida por categorías
    • Sistema de domicilios
+
+🆕 *"prietos"*
+   • Selección de comida por categorías
+   • Algunos items son personalizables
 
 💡 Comandos especiales:
    • *"reiniciar"* - Reinicia todas las conversaciones
