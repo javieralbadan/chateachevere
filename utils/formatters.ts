@@ -62,6 +62,15 @@ export const formatPrice = (value: number) => {
   return formatter.format(value);
 };
 
+export const formatPriceShort = (value: number, symbolPrefix = true, thousandsLetter = false) => {
+  if (!value) {
+    return '';
+  }
+
+  const shortValue = value / 1000;
+  return `${symbolPrefix ? '$' : ''}${shortValue}${thousandsLetter ? 'k' : ''}`;
+};
+
 export const formatPhoneNumber = (phone: string): string => {
   const phoneStr = String(phone);
   const cleanPhone = phoneStr.replace(/\D/g, '');

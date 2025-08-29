@@ -1,0 +1,152 @@
+{
+  "numeroTransferencias": "573102752476",
+  "costoDomicilio": 2000,
+  "mensajeInicial": "Este es el menú del día, este es nuestro menú:",
+  "infoAdicional": "La bandeja además de principio y proteína, lleva arroz y ensalada.",
+  "categorias": {
+    "entradas": {
+      "nombre": "ENTRADAS",
+      "emoji": "🍟",
+      "infoAdicional": "",
+      "items": [
+        { "nombre": "Papa francesa", "precio": 7000 },
+        { "nombre": "Papa en casco", "precio": 7000 },
+        { "nombre": "Patacón con hogao", "precio": 9500 },
+        { "nombre": "Choripapa", "precio": 10500 },
+        { "nombre": "Choripapa gratinado", "precio": 14500 }
+      ]
+    },
+    "menus": {
+      "nombre": "MENÚS",
+      "emoji": "🥩",
+      "infoAdicional": "Todo menú incluye: Arroz + Ensalada (opcional)",
+      "items": [
+        {
+          "nombre": "Menú 1",
+          "precio": 16500,
+          "descripcion": "Complemento de ajiaco + Pollo sudado + Mazorca + Arepa + Aguacate + Plátano"
+        },
+        {
+          "nombre": "Menú 2",
+          "precio": 14500,
+          "descripcion": "Cerdo en salsa miel mostaza + Zukinni mixto + Yuca"
+        },
+        {
+          "nombre": "Menú 3",
+          "precio": 14500,
+          "descripcion": "Selecciona tu proteína preferida + Garbanzos + Plátano",
+          "personalizacion": [
+            {
+              "nombre": "PROTEÍNA",
+              "emoji": "🥩",
+              "orden": 1,
+              "footerInfo": "Recuerda que también viene con: Arroz + Ensalada (opcional)",
+              "opciones": [
+                { "nombre": "Res", "precio": 0 },
+                { "nombre": "Cerdo", "precio": 0 },
+                { "nombre": "Pechuga", "precio": 0 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "ejecutivo": {
+      "nombre": "MENU EJECUTIVO",
+      "emoji": "🥩",
+      "infoAdicional": "Incluye: Papa francesa + Plátano + Guacamole o chimichurri + Arroz + Ensalada (opcional)",
+      "items": [
+        { "nombre": "Res", "precio": 18000 },
+        { "nombre": "Cerdo", "precio": 17000 },
+        { "nombre": "Pechuga", "precio": 17000 },
+        { "nombre": "Hígado de 200 gr", "precio": 17000 }
+      ]
+    },
+    "especiales": {
+      "nombre": "ESPECIALES",
+      "emoji": "",
+      "infoAdicional": "Cada especial incluye: Papa francesa + Plátano + Arroz + Ensalada (opcional)",
+      "items": [
+        { "nombre": "Punta de Anca 400 Gr", "precio": 32000 },
+        { "nombre": "Churrasco 300 Gr", "precio": 34000 },
+        { "nombre": "Churrasco Gratinado", "precio": 36000 },
+        { "nombre": "Bistec a Caballo", "precio": 26000 },
+        { "nombre": "Costillas Cerdo Bbq", "precio": 28000 },
+        {
+          "nombre": "Parrillada Mixta",
+          "precio": 30000,
+          "descripcion": "(Res, cerdo, pechuga y chorizo) + Guacamole o chimichurri"
+        },
+        { "nombre": "Pechuga Hawaiana", "precio": 32000 },
+        { "nombre": "Pechuga Gratinada", "precio": 25000 },
+        { "nombre": "Pierna Pernil", "precio": 22000 },
+        { "nombre": "Trucha a La Plancha", "precio": 29000 },
+        { "nombre": "Mojarra 250 Gr", "precio": 24000 },
+        { "nombre": "Mojarra 500 Gr", "precio": 31000 }
+      ]
+    },
+    "bebidasFrias": {
+      "nombre": "BEBIDAS FRÍAS",
+      "emoji": "🥤",
+      "infoAdicional": "",
+      "items": [
+        { "nombre": "Limonada de coco", "precio": 8500 },
+        { "nombre": "Limonada tradicional", "precio": 6000 },
+        {
+          "nombre": "Jugo en agua",
+          "precio": 6500,
+          "descripcion": "(Sujeto a disponibilidad)",
+          "personalizacion": [
+            {
+              "nombre": "SABOR",
+              "emoji": "🥤",
+              "orden": 1,
+              "opciones": [
+                { "nombre": "Guanábana", "precio": 0 },
+                { "nombre": "Maracuyá", "precio": 0 },
+                { "nombre": "Mora", "precio": 0 },
+                { "nombre": "Lulo", "precio": 0 },
+                { "nombre": "Feioja", "precio": 0 },
+                { "nombre": "Fresa", "precio": 0 },
+                { "nombre": "Frutos rojos", "precio": 0 }
+              ]
+            }
+          ]
+        },
+        {
+          "nombre": "Jugo en leche",
+          "precio": 7500,
+          "descripcion": "(Sujeto a disponibilidad)",
+          "personalizacion": [
+            {
+              "nombre": "SABOR",
+              "emoji": "🥤",
+              "orden": 1,
+              "opciones": [
+                { "nombre": "Guanábana", "precio": 0 },
+                { "nombre": "Maracuyá", "precio": 0 },
+                { "nombre": "Mora", "precio": 0 },
+                { "nombre": "Lulo", "precio": 0 },
+                { "nombre": "Feioja", "precio": 0 },
+                { "nombre": "Fresa", "precio": 0 },
+                { "nombre": "Frutos rojos", "precio": 0 }
+              ]
+            }
+          ]
+        },
+        { "nombre": "Jugo de naranja", "precio": 5000 }
+      ]
+    },
+    "bebidasEspeciales": {
+      "nombre": "BEBIDAS ESPECIALES",
+      "emoji": "🥤",
+      "infoAdicional": "",
+      "items": [
+        { "nombre": "Gaseosa personal y jugos hit", "precio": 4000 },
+        { "nombre": "Gaseosa familiar", "precio": 14000 },
+        { "nombre": "Gaseosa 1/4", "precio": 9000 },
+        { "nombre": "Agua botella", "precio": 3500 }
+      ]
+    }
+  }
+}

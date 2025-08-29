@@ -2,12 +2,14 @@ import { handleAdminCommand } from '@/services/core/admin';
 import type { ConversationHandler, ConversationHandlerModule } from '@/types/conversation';
 import * as carneBrava from '../carne-brava/conversation-handler';
 import * as cheefoodies from '../cheefoodies/conversation-handler';
+import * as donPrietos from '../don-prietos/conversation-handler';
 import { getHelpMessage, getInitialWelcomeMessage } from './custom-messages';
 
-type TestTenantType = 'carne-brava' | 'cheefoodies';
+type TestTenantType = 'carne-brava' | 'cheefoodies' | 'don-prietos';
 const testTenants: Record<TestTenantType, ConversationHandlerModule> = {
   'carne-brava': carneBrava,
   cheefoodies,
+  'don-prietos': donPrietos,
 };
 
 // ===== SYSTEM KEYWORDS VERIFICATION =====
@@ -28,19 +30,22 @@ function detectTenantFromMessage(message: string): TestTenantType | null {
   const lowerMessage = message.toLowerCase().trim();
   if (lowerMessage.includes('brava')) return 'carne-brava';
   if (lowerMessage.includes('domicilios')) return 'cheefoodies';
+  if (lowerMessage.includes('prietos')) return 'don-prietos';
   return null;
 }
 
 async function getActiveTenant(phoneNumber: string): Promise<TestTenantType | null> {
   try {
     // Verificar conversaciones activas en paralelo
-    const [isCarneBravaActive, isCheefoodiesActive] = await Promise.all([
+    const [isCarneBravaActive, isCheefoodiesActive, isDonPrietosActive] = await Promise.all([
       carneBrava.hasActiveConvo(phoneNumber),
       cheefoodies.hasActiveConvo(phoneNumber),
+      donPrietos.hasActiveConvo(phoneNumber),
     ]);
 
     if (isCarneBravaActive) return 'carne-brava';
     if (isCheefoodiesActive) return 'cheefoodies';
+    if (isDonPrietosActive) return 'don-prietos';
 
     return null;
   } catch (error) {
@@ -51,8 +56,12 @@ async function getActiveTenant(phoneNumber: string): Promise<TestTenantType | nu
 
 async function clearAllConversations(phoneNumber: string): Promise<void> {
   try {
-    await Promise.all([carneBrava.clearConvo(phoneNumber), cheefoodies.clearConvo(phoneNumber)]);
-    console.log(`🧹 Conversaciones limpiadas para ${phoneNumber}`);
+    await Promise.all([
+      carneBrava.clearConvo(phoneNumber),
+      cheefoodies.clearConvo(phoneNumber),
+      donPrietos.clearConvo(phoneNumber),
+    ]);
+    console.log(`🧹 Conversación limpiada para ${phoneNumber}`);
   } catch (error) {
     console.error('❌ Error limpiando conversaciones:', error);
   }
@@ -71,7 +80,7 @@ export const conversationHandler: ConversationHandler = async (phoneNumber, mess
     if (isKeywordMessage('restart', trimmedMessage)) {
       console.log('Reiniciando conversaciones...');
       await clearAllConversations(phoneNumber);
-      return `✅ *Conversaciones reiniciadas*\n\n${getInitialWelcomeMessage()}`;
+      return `✅ *Conversación reiniciada*\n\n${getInitialWelcomeMessage()}`;
     }
 
     if (isKeywordMessage('help', trimmedMessage)) {
