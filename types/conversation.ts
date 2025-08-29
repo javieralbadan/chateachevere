@@ -1,5 +1,5 @@
 import { Timestamp } from '@/utils/server/firebase';
-import { FlowType, SequentialSelections, StepHandler } from './menu';
+import { FlowType, MenuItem, SequentialSelections, StepHandler } from './menu';
 
 // ===== CONVERSATION =====
 
@@ -16,15 +16,18 @@ export interface CacheEntry {
 }
 
 type ConversationStep =
+  // Categories
   | 'category_welcome'
-  | 'sequential_welcome'
-  | 'sequential_step_selection'
   | 'category_selection'
   | 'item_selection'
+  | 'item_customization'
+  // Sequential
+  | 'sequential_welcome'
+  | 'sequential_step_selection'
+  // Cart
   | 'quantity_selection'
   | 'cart_actions'
-  | 'checkout'
-  | 'final';
+  | 'checkout';
 
 export type WelcomeConvoStep = ConversationStep & ('category_welcome' | 'sequential_welcome');
 export type RepeatFlowConvoStep = ConversationStep & ('category_selection' | 'sequential_welcome');
@@ -44,6 +47,12 @@ export interface CartConversation extends BaseConversation {
     name: string;
     price: number;
     description?: string;
+  };
+  // Flujo de categorias con personalización
+  customizationFlow?: {
+    currentStep: number;
+    selections: Record<string, MenuItem>;
+    baseItem: MenuItem;
   };
   // Para flujo secuencial
   sequentialFlow?: {

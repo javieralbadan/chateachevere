@@ -128,11 +128,17 @@ const ChatbotTester: React.FC = () => {
                 <div className="whitespace-pre-wrap m-0">
                   <Text strong>{MESSAGE[item.type].text}</Text>
                   <br />
-                  {reactStringReplace(item.content, /\*(.*?)\*/g, (match, i) => (
-                    <Text strong key={i}>
-                      {match}
-                    </Text>
-                  ))}
+                  {reactStringReplace(
+                    reactStringReplace(item.content, /\*(.*?)\*/g, (match, i) => (
+                      <Text strong key={`bold-${i}`}>
+                        {match}
+                      </Text>
+                    )),
+                    /\_(.*?)\_/g,
+                    (match, i) => (
+                      <i key={`italic-${i}`}>{match}</i>
+                    ),
+                  )}
                 </div>
               </Card>
             </div>

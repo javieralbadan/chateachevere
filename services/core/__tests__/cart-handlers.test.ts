@@ -276,6 +276,17 @@ describe('CartHandlers', () => {
       { name: 'Pizza', quantity: 1, price: 15000, category: 'food' },
     ];
 
+    const mockOrderData = {
+      id: 'order123',
+      orderNumber: 'ORD-001',
+      total: 11000,
+    };
+
+    beforeEach(() => {
+      mockedCreateOrder.mockReturnValue(mockOrderData as any);
+      mockedStoreOrderInDB.mockResolvedValue('order123');
+    });
+
     test('should handle option 1 - add more products for categories flow', async () => {
       const conversation = { ...mockConvoBase, cart: mockCartWithItems };
 
@@ -315,7 +326,7 @@ describe('CartHandlers', () => {
       expect(result).toBe('Start sequential process:');
     });
 
-    test('should handle option 2 - proceed to checkout', async () => {
+    test('should handle option 2 - finish order', async () => {
       const conversation = { ...mockConvoBase, cart: mockCartWithItems };
 
       const result = await handlers.cartActions({
@@ -324,13 +335,23 @@ describe('CartHandlers', () => {
         conversation: conversation as CartConversation,
       });
 
-      expect(mockManager.updateConversation).toHaveBeenCalledWith(mockPhoneNumber, {
-        step: 'checkout',
+      expect(result).toContain('Order confirmed!');
+      expect(mockedCreateOrder).toHaveBeenCalledWith({
+        tenantInfo: {
+          name: 'test-tenant',
+          transfersPhoneNumber: '+1234567890',
+          deliveryCost: 5000,
+        },
+        phoneNumber: mockPhoneNumber,
+        cart: mockCartWithItems,
       });
-      expect(result).toContain('📋 *CONFIRMACIÓN DE PEDIDO*');
-      expect(result).toContain('Coca Cola');
-      expect(result).toContain('Pizza');
-      expect(result).toContain('💸 *Realiza transferencia al Nequi +1234567890*');
+      expect(mockedStoreOrderInDB).toHaveBeenCalledWith(mockOrderData);
+      expect(mockManager.clearConversation).toHaveBeenCalledWith(mockPhoneNumber);
+      expect(mockConditionalMessages.categories?.getFinalMessage).toHaveBeenCalledWith({
+        transfersPhoneNumber: '+1234567890',
+        orderId: 'order123',
+        orderData: mockOrderData,
+      });
     });
 
     test('should return error when trying to checkout with empty cart', async () => {
@@ -383,31 +404,25 @@ describe('CartHandlers', () => {
     });
   });
 
-  describe('checkout handler', () => {
+  describe('checkout handler - temporary unused', () => {
     const mockCartWithItems = [{ name: 'Coca Cola', quantity: 2, price: 3000, category: 'drinks' }];
+
     const mockOrderData = {
       id: 'order123',
       orderNumber: 'ORD-001',
       total: 11000,
     };
 
-    beforeEach(() => {
-      mockedCreateOrder.mockReturnValue(mockOrderData as any);
-      mockedStoreOrderInDB.mockResolvedValue('order123');
-    });
-
     test('should handle option 1 - confirm payment', async () => {
       const conversation = { ...mockConvoBase, cart: mockCartWithItems };
 
-      const result = await handlers.checkout({
+      const result = await handlers.cartActions({
         phoneNumber: mockPhoneNumber,
-        message: '1',
+        message: '2',
         conversation: conversation as CartConversation,
       });
 
-      expect(mockManager.updateConversation).toHaveBeenCalledWith(mockPhoneNumber, {
-        step: 'final',
-      });
+      expect(result).toContain('Order confirmed!');
       expect(mockedCreateOrder).toHaveBeenCalledWith({
         tenantInfo: {
           name: 'test-tenant',
@@ -420,10 +435,10 @@ describe('CartHandlers', () => {
       expect(mockedStoreOrderInDB).toHaveBeenCalledWith(mockOrderData);
       expect(mockManager.clearConversation).toHaveBeenCalledWith(mockPhoneNumber);
       expect(mockConditionalMessages.categories?.getFinalMessage).toHaveBeenCalledWith({
+        transfersPhoneNumber: '+1234567890',
         orderId: 'order123',
         orderData: mockOrderData,
       });
-      expect(result).toBe('Order confirmed!');
     });
 
     test('should handle option 2 - add more products', async () => {

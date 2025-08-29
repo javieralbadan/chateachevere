@@ -71,17 +71,14 @@ export const createCartHandlers = ({ tenantConfig, manager, conditionalMessages 
         return customMessages.getRepeatFlowMessage();
 
       case 2:
-        // Proceder al checkout
+        // Finalizar pedido
         if (conversation.cart.length === 0) {
           return customMessages.getWelcomeMessage('❌ Tu carrito está vacío!');
         }
 
-        await manager.updateConversation(phoneNumber, { step: 'checkout' });
-        return getCheckoutMessage({
-          cart: conversation.cart,
-          deliveryCost: tenantConfig.deliveryCost,
-          transfersPhoneNumber: tenantConfig.transfersPhoneNumber,
-        });
+        const { orderId, orderData } = await finishConversation(phoneNumber, conversation);
+        const { transfersPhoneNumber } = tenantConfig;
+        return customMessages.getFinalMessage({ transfersPhoneNumber, orderId, orderData });
 
       case 3:
         // Vaciar carrito
@@ -96,27 +93,20 @@ export const createCartHandlers = ({ tenantConfig, manager, conditionalMessages 
     }
   };
 
-  // Handler para checkout [checkout] - Titulo: "CONFIRMACIÓN DE PEDIDO"
+  // (Sin uso temporal) Handler para opciones de pago [checkout] - Titulo: "PAGO"
   const checkout: StepHandler = async ({ phoneNumber, message, conversation }) => {
     const option = parseInt(message.trim(), 10);
 
     switch (option) {
       case 1:
-        // -> Confirmar pago. TODO: Check si es necesario hacer este update, al final se hace clean
-        await manager.updateConversation(phoneNumber, { step: 'final' });
+        // Finalizar pedido
+        if (conversation.cart.length === 0) {
+          return customMessages.getWelcomeMessage('❌ Tu carrito está vacío!');
+        }
 
-        const tenantInfo: TenantInfo = {
-          name: tenantConfig.tenantId,
-          transfersPhoneNumber: tenantConfig.transfersPhoneNumber,
-          deliveryCost: tenantConfig.deliveryCost,
-        };
-        if (logModule) console.log('Creando orden para ', tenantConfig.tenantId);
-        const orderData = createOrder({ tenantInfo, phoneNumber, cart: conversation.cart });
-        const orderId = await storeOrderInDB(orderData);
-
-        await manager.clearConversation(phoneNumber);
-
-        return customMessages.getFinalMessage({ orderId, orderData });
+        const { orderId, orderData } = await finishConversation(phoneNumber, conversation);
+        const { transfersPhoneNumber } = tenantConfig;
+        return customMessages.getFinalMessage({ transfersPhoneNumber, orderId, orderData });
 
       case 2:
         // Agregar más productos
@@ -140,10 +130,31 @@ export const createCartHandlers = ({ tenantConfig, manager, conditionalMessages 
     }
   };
 
+  // ===== CLOSURE HELPERS =====
+
+  const finishConversation = async (phoneNumber: string, conversation: CartConversation) => {
+    if (logModule) console.log('Creando orden para ', tenantConfig.tenantId);
+    const tenantInfo: TenantInfo = {
+      name: tenantConfig.tenantId,
+      transfersPhoneNumber: tenantConfig.transfersPhoneNumber,
+      deliveryCost: tenantConfig.deliveryCost,
+    };
+
+    const orderData = createOrder({ tenantInfo, phoneNumber, cart: conversation.cart });
+    if (logModule) console.log('orderData', orderData);
+    const orderId = await storeOrderInDB(orderData);
+    if (logModule) console.log('orderId (ya guardado en DB)', orderId);
+
+    await manager.clearConversation(phoneNumber);
+    if (logModule) console.log(`🧹 Conversación limpiada para ${phoneNumber}`);
+
+    return { orderId, orderData };
+  };
+
   return { quantitySelection, cartActions, checkout };
 };
 
-// ===== HELPERS =====
+// ===== DEFAULT MESSAGES & UTILS =====
 
 // Validar y obtener item para agregar al carrito
 function validateAndGetItemForCart(conversation: CartConversation): ValidateItemReturn {
@@ -200,7 +211,7 @@ const getCartActionsMessage = (cart: CartItem[], deliveryCost: number): string =
 
   message += '¿Qué deseas hacer?\n\n';
   message += '1️⃣ Agregar más productos\n';
-  message += '2️⃣ Proceder al pago\n';
+  message += '2️⃣ Finalizar pedido\n';
   message += '3️⃣ Vaciar carrito\n\n';
   message += '*Elige un número (1-3)*';
 

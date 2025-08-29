@@ -56,4 +56,3 @@ manager.registerHandler('item_selection', categoriesHandlers.itemSelection);
 // Registrar handlers del carrito
 manager.registerHandler('quantity_selection', cartHandlers.quantitySelection);
 manager.registerHandler('cart_actions', cartHandlers.cartActions);
-manager.registerHandler('checkout', cartHandlers.checkout);

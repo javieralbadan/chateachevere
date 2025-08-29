@@ -4,11 +4,23 @@ export interface SpanishMenuItem {
   descripcion?: string;
 }
 
-export interface SpanishCategory {
+interface SpanishBaseCategory {
   nombre: string;
   emoji: string;
   infoAdicional?: string;
+}
+
+export interface SpanishCategory extends SpanishBaseCategory {
   items: SpanishMenuItem[];
+}
+
+export interface SpanishCustomizableCategory extends SpanishBaseCategory {
+  opciones: SpanishMenuItem[];
+  orden: number;
+}
+
+export interface SpanisCustomizableMenuItem extends SpanishMenuItem {
+  personalizacion: SpanishCustomizableCategory[];
 }
 
 export interface SpanishSequentialFlowStep extends SpanishCategory {

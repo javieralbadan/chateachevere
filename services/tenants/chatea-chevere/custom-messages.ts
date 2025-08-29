@@ -7,7 +7,7 @@ Prueba nuestros ejemplos de conversaciones:
 🍽️ *"domicilios"* - Demo domicilios
 🆕 *"prietos"* - Demo Don Prietos
 
-_¡Experimenta y descubre cómo un chatbot puede revolucionar tu negocio!_ 🚀
+_¡Experimenta y descubre cómo un chatbot revoluciona tu negocio!_ 🚀
 
 _Escribe "ayuda" para más opciones_ 💡`;
 };

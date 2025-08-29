@@ -2,14 +2,9 @@ import { CartConversation, ConversationManager, OrderData } from './conversation
 
 // ===== BASIC CONFIG =====
 
-export interface MenuItem {
-  name: string;
-  price: number;
-  description?: string;
-}
-
 export type FlowType = 'sequential' | 'categories';
 
+// TODO: Agregar atributo para shortPriceFormat
 export interface TenantConfigBase {
   tenantId: string;
   flowType: FlowType;
@@ -21,17 +16,43 @@ export type TenantConfig = SequentialFlowConfig | CategoriesFlowConfig;
 
 // ===== CATEGORY FLOW =====
 
-export interface Category {
+export interface MenuItem {
+  name: string;
+  price: number;
+  description?: string;
+}
+
+interface BaseCategory {
   name: string;
   emoji: string;
   footerInfo?: string;
+}
+
+export interface Category extends BaseCategory {
   items: MenuItem[];
+}
+
+export interface CustomizableCategory extends BaseCategory {
+  options: MenuItem[];
+  order: number;
+}
+
+export interface CustomizableMenuItem extends MenuItem {
+  customizationSteps: CustomizableCategory[];
 }
 
 export type CategoriesConfig = Record<string, Category>;
 export interface CategoriesFlowConfig extends TenantConfigBase {
   categories: CategoriesConfig;
 }
+
+export type CompleteCustomizationProps = {
+  phoneNumber: string;
+  selections: Record<string, MenuItem>;
+  baseItem: MenuItem;
+};
+
+export type CompleteCustomizationFn = (props: CompleteCustomizationProps) => Promise<string>;
 
 // ===== SEQUENTIAL FLOW =====
 
@@ -91,9 +112,16 @@ type CustomMessageFn = (...args: any[]) => string | Promise<string>;
 export type CustomMessages = {
   getWelcomeMessage: CustomMessageFn;
   getRepeatFlowMessage: CustomMessageFn;
+  getItemsSelectionMessage?: (...args: any) => string;
+  getCustomizableCategoryMessage?: (
+    step: CustomizableCategory,
+    baseItem: CustomizableMenuItem,
+  ) => string;
+  getQuantityMessage?: (menuItem: MenuItem) => string;
 };
 
 export interface GetFinalMessageProps {
+  transfersPhoneNumber: string;
   orderId: string;
   orderData: OrderData;
 }

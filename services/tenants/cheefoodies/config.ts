@@ -8,7 +8,7 @@ export const fallbackData: SpanishTenantConfig = {
   costoDomicilio: 2000, // En pesos, $2.000 por domicilio
   categorias: {
     desayunos: {
-      nombre: 'DESAYUNOS DISPONIBLES',
+      nombre: 'DESAYUNOS',
       emoji: '🌅',
       items: [
         { nombre: 'Desayuno bogotano', precio: 15000 },
@@ -21,7 +21,7 @@ export const fallbackData: SpanishTenantConfig = {
       ],
     },
     almuerzos: {
-      nombre: 'ALMUERZOS DISPONIBLES',
+      nombre: 'ALMUERZOS',
       emoji: '🍽️',
       infoAdicional: '*Todos incluyen:* arroz, aguacate, ensalada, jugo y principio',
       items: [
